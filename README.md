@@ -8,7 +8,7 @@
 
 | Tool | URL |
 |---|---|
-| 🧑‍💻 **Developer Explorer** | [https://hosni-a.github.io/odoo-explorer/odoo19_learning.html](https://hosni-a.github.io/odoo-explorer/odoo19_learning.html) |
+| 🧑‍💻 **Developer Explorer** | [https://hosni-a.github.io/odoo-explorer/](https://hosni-a.github.io/odoo-explorer/) |
 | 🤝 **Client Presentation** | [https://hosni-a.github.io/odoo-explorer/odoo19_client.html](https://hosni-a.github.io/odoo-explorer/odoo19_client.html) |
 | 📦 **GitHub Repository** | [https://github.com/hosni-a/odoo-explorer](https://github.com/hosni-a/odoo-explorer) |
 
@@ -18,14 +18,14 @@
 
 ```
 odoo-explorer/
-├── odoo19_learning.html   ← Developer Explorer (models, fields, workflows, quiz)
+├── index.html             ← Developer Explorer (models, fields, workflows, quiz)
 ├── odoo19_client.html     ← Client Presentation (benefits, processes, tips)
 └── README.md              ← This file
 ```
 
 ---
 
-## 🧑‍💻 File 1 — Developer Explorer (`odoo19_learning.html`)
+## 🧑‍💻 File 1 — Developer Explorer (`index.html`)
 
 Built for **junior and senior Odoo developers** who want a structured reference on the standard Odoo 19 module catalog.
 
@@ -128,7 +128,7 @@ Just open the live links above — no installation needed.
 git clone https://github.com/hosni-a/odoo-explorer.git
 cd odoo-explorer
 # open either file directly in your browser
-open odoo19_learning.html   # Developer version
+open index.html             # Developer version
 open odoo19_client.html     # Client version
 ```
 
@@ -142,7 +142,7 @@ Both files use plain JavaScript with all data embedded as objects. Adding conten
 
 ### Add a module to the Developer Explorer
 
-Find the `MODS` array in `odoo19_learning.html` and add a new object following this structure:
+Find the `MODS` array in `index.html` and add a new object following this structure:
 
 ```js
 {
@@ -209,7 +209,7 @@ Find the `MODS` array in `odoo19_client.html` and add a new object:
 
 ### Add quiz questions (Developer Explorer only)
 
-Find the `QS` array in `odoo19_learning.html`:
+Find the `QS` array in `index.html`:
 
 ```js
 {
@@ -240,7 +240,7 @@ Find the `QS` array in `odoo19_learning.html`:
 | Framework | None — vanilla HTML, CSS, JavaScript |
 | External dependencies | Google Fonts only (can be removed for full offline use) |
 | Browser support | Chrome 90+, Firefox 90+, Safari 15+, Edge 90+ |
-| File sizes | `odoo19_learning.html` ~110 KB · `odoo19_client.html` ~95 KB |
+| File sizes | `index.html` ~110 KB · `odoo19_client.html` ~95 KB |
 | Odoo version | 19.0 |
 | Data source | Odoo 19 official source code and documentation |
 
