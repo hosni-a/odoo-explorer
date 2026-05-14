@@ -1,232 +1,231 @@
-# Odoo 19 — Module Explorer & Certification Prep
+# 🟣 Odoo 19 Explorer
 
-> An interactive, bilingual (EN/FR) learning tool for developers preparing for the **Odoo 19 Functional or Technical Certification**. Explore core modules, drill into models and fields, visualize workflows, and test your knowledge with a built-in quiz engine.
-
----
-
-## 📋 Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [How to Use](#how-to-use)
-- [Modules Covered](#modules-covered)
-- [Data Structure](#data-structure)
-- [Language Support](#language-support)
-- [Quiz Engine](#quiz-engine)
-- [File Structure](#file-structure)
-- [Customization](#customization)
-- [Technical Notes](#technical-notes)
+> Two interactive, bilingual (EN/FR) web tools to explore Odoo 19 standard modules — one for developers, one for clients. No installation, no build step, open in any browser.
 
 ---
 
-## Overview
+## 🔗 Live Links
 
-`odoo19_learning.html` is a **single self-contained HTML file** — no server, no npm, no build step required. Open it in any modern browser and it works offline. It was built for junior and senior Odoo developers who want a fast, structured way to:
-
-- Navigate the standard Odoo 19 module catalog
-- Understand the key models, fields, and relationships inside each module
-- Visualize state machine workflows (order lifecycle, invoice lifecycle, etc.)
-- Review certification tips and common exam gotchas
-- Quiz themselves before sitting the Odoo certification exam
+| Tool | URL |
+|---|---|
+| 🧑‍💻 **Developer Explorer** | [https://hosni-a.github.io/odoo-explorer/odoo19_learning.html](https://hosni-a.github.io/odoo-explorer/odoo19_learning.html) |
+| 🤝 **Client Presentation** | [https://hosni-a.github.io/odoo-explorer/odoo19_client.html](https://hosni-a.github.io/odoo-explorer/odoo19_client.html) |
+| 📦 **GitHub Repository** | [https://github.com/hosni-a/odoo-explorer](https://github.com/hosni-a/odoo-explorer) |
 
 ---
 
-## Features
+## 📁 Repository Structure
+
+```
+odoo-explorer/
+├── odoo19_learning.html   ← Developer Explorer (models, fields, workflows, quiz)
+├── odoo19_client.html     ← Client Presentation (benefits, processes, tips)
+└── README.md              ← This file
+```
+
+---
+
+## 🧑‍💻 File 1 — Developer Explorer (`odoo19_learning.html`)
+
+Built for **junior and senior Odoo developers** who want a structured reference on the standard Odoo 19 module catalog.
+
+### Features
 
 | Feature | Details |
 |---|---|
-| 🌐 Bilingual UI | Full English / French toggle — switches every label, description, field, tip, and quiz question instantly |
-| 📚 Learn Mode | Browse 13 core modules with descriptions, models, fields, and workflows |
-| 🧩 Model Explorer | Click any module → expand any model → see all fields with type, required flag, and description |
-| 🔄 Workflow Viewer | State machine diagram + numbered step-by-step lifecycle for each module |
-| 💡 Cert Tips | Curated exam tips per module — common gotchas and tricky distinctions |
-| 🧠 Quiz Mode | 27+ bilingual questions, configurable count (5 / 10 / 20 / All), per-module or mixed |
-| 🔍 Search & Filter | Real-time search + category filter (Sales, Finance, Inventory, HR, Project, etc.) |
-| 📱 Responsive | Works on desktop and tablet screens |
-| ⚡ Zero dependencies | No framework, no CDN required (except Google Fonts for typography) |
+| 📚 **Learn Mode** | Browse 13 core modules with full technical descriptions |
+| 🧩 **Model Explorer** | Expand any model to see all fields with type, required flag, and description |
+| 🔄 **Workflow Viewer** | State machine diagram + numbered lifecycle steps per module |
+| 💡 **Cert Tips** | Curated tips per module — tricky distinctions and common gotchas |
+| 🧠 **Quiz Mode** | 27+ bilingual questions, configurable count (5/10/20/All), per-module or mixed |
+| 🔍 **Search & Filter** | Real-time search + 8 category filters |
+| 🌐 **Bilingual** | Full EN / FR toggle — every label, field, tip, and quiz question |
 
----
-
-## How to Use
-
-### 1. Open the file
-
-```bash
-# Simply open in your browser — no server needed
-open index.html
-# or double-click the file in your file manager
-```
-
-### 2. Learn Mode
-
-1. Browse the module grid — use the **search bar** or **category filters** to narrow down
-2. Click any module card to open its detail view
-3. Switch between three tabs:
-   - **Models** — click a model row to expand its field table
-   - **Workflow** — state diagram and lifecycle steps
-   - **Cert Tips** — exam-focused notes
-
-### 3. Quiz Mode
-
-1. Click **Quiz** in the top navigation bar
-2. Select a module focus (or keep "All modules")
-3. Choose the number of questions: 5 / 10 / 20 / All
-4. Answer each question — immediate feedback with explanation
-5. View your score and result rating at the end
-
-### 4. Switch Language
-
-Click the **EN / FR** toggle in the top-right corner of the navigation bar. The entire interface — including all module data, field descriptions, workflow steps, tips, and quiz questions — switches instantly.
-
----
-
-## Modules Covered
+### Modules Covered
 
 | Module | Technical Name | Category |
 |---|---|---|
 | Sales | `sale` | Sales & CRM |
 | CRM | `crm` | Sales & CRM |
 | Accounting | `account` | Finance |
-| Inventory / Stock | `stock` | Inventory |
+| Inventory | `stock` | Inventory |
 | Purchase | `purchase` | Inventory |
-| Employees (HR) | `hr` | HR |
+| Employees | `hr` | HR |
 | Time Off | `hr_holidays` | HR |
 | Payroll | `hr_payroll` | HR |
 | Manufacturing | `mrp` | Manufacturing |
 | Project | `project` | Project |
-| Website / eCommerce | `website` | Website |
+| Website | `website` | Website |
 | Base | `base` | Technical |
 | Discuss / Mail | `mail` | Technical |
 
-Each module includes:
-- Module description and purpose
-- 2–4 key models with full field tables
-- Workflow state machine (states + lifecycle steps)
-- 3–5 certification exam tips
+---
+
+## 🤝 File 2 — Client Presentation (`odoo19_client.html`)
+
+Built for **client-facing presentations and demos**. Zero technical jargon — no model names, no field tables, no code. Just clear business value.
+
+### Features
+
+| Feature | Details |
+|---|---|
+| 🗂️ **Module Cards** | Clean visual grid with business-oriented descriptions |
+| ✅ **Benefits** | 4 concrete benefits per module explained in plain language |
+| 🔄 **Process View** | Step-by-step workflow explained as a business process |
+| 💡 **Good to Know** | Practical tips for getting the most out of each module |
+| 🌐 **Bilingual** | Full EN / FR toggle — default language is French |
+| 🖥️ **Slide panel** | Detail view opens in a smooth side panel, no page reload |
+
+### Modules Covered
+
+| Module | Category |
+|---|---|
+| Sales | Commercial |
+| CRM | Commercial |
+| Accounting | Finance |
+| Inventory & Stock | Logistics |
+| Purchase | Logistics |
+| Human Resources | HR |
+| Time Off & Absences | HR |
+| Payroll | HR |
+| Projects | Projects |
+| Website & E-commerce | Web |
+| Manufacturing | Manufacturing |
+| Discuss & Messaging | Collaboration |
 
 ---
 
-## Data Structure
+## 🌐 Bilingual Support
 
-All data is embedded as plain JavaScript objects inside the HTML file. Each module entry follows this shape:
+Both tools support **English and French** with a toggle button in the navigation bar. Switching language updates every piece of content instantly — no page reload required.
+
+**What gets translated in the Developer Explorer:**
+- Navigation, hero section, stat labels, search placeholder
+- Category filter names
+- Module names, descriptions, model names, field descriptions
+- Workflow titles, state names, step titles and descriptions
+- Certification tips
+- All 27+ quiz questions, answer options, and explanations
+- UI buttons and result feedback messages
+
+**What gets translated in the Client Presentation:**
+- Navigation, hero section
+- Module names, category labels, descriptions
+- All benefit titles and descriptions
+- Process state names and step descriptions
+- Tips content
+- All UI labels and buttons
+
+---
+
+## 🚀 How to Use
+
+### Online (recommended)
+Just open the live links above — no installation needed.
+
+### Locally
+```bash
+git clone https://github.com/hosni-a/odoo-explorer.git
+cd odoo-explorer
+# open either file directly in your browser
+open odoo19_learning.html   # Developer version
+open odoo19_client.html     # Client version
+```
+
+> No server, no npm, no build step. Both files are fully self-contained.
+
+---
+
+## 🛠️ How to Contribute
+
+Both files use plain JavaScript with all data embedded as objects. Adding content is straightforward.
+
+### Add a module to the Developer Explorer
+
+Find the `MODS` array in `odoo19_learning.html` and add a new object following this structure:
 
 ```js
 {
-  id: 'sale',          // unique identifier
-  icon: '🛒',          // emoji displayed on card
-  cat: 'sales',        // category for filtering
-
-  en: {                // English content
-    name: 'Sales',
-    tn: 'sale',        // technical name (module name in Odoo)
-    desc: '...',       // module description
-
+  id: 'my_module',
+  icon: '🔧',
+  cat: 'technical',          // sales | finance | inventory | hr | project | website | manufacture | technical
+  en: {
+    name: 'My Module',
+    tn: 'my_module',
+    desc: 'What this module does...',
     models: [
       {
-        name: 'Sale Order',
-        tech: 'sale.order',
-        desc: '...',
+        name: 'My Model',
+        tech: 'my.model',
+        desc: 'Short description',
         fields: [
-          { n: 'name', t: 'char', r: 1, d: 'Order reference' },
-          //   n = field name
-          //   t = field type (char, int, float, bool, date, many2one, one2many, many2many, select, text, binary)
-          //   r = required (1 = required, 0 = optional)
-          //   d = description
+          { n: 'name', t: 'char', r: 1, d: 'Record name' },
+          // t: char | int | float | bool | date | many2one | one2many | many2many | select | text | binary
+          // r: 1 = required, 0 = optional
         ]
       }
     ],
-
-    wf: {              // workflow
-      title: 'Sales Order Lifecycle',
-      states: ['Draft', '→', 'Sent', '→', 'Done'],
-      st: ['start', '', '', '', 'end'],   // state CSS class
+    wf: {
+      title: 'My Module Lifecycle',
+      states: ['Draft', '→', 'Confirmed', '→', 'Done'],
+      st: ['start', '', '', '', 'end'],
       steps: [
-        { n: '01', t: 'Create Quotation', d: 'Description...' }
+        { n: '01', t: 'Step title', d: 'Step description.' }
       ]
     },
-
-    tips: [
-      '⚡ Tip text here...'
-    ]
+    tips: ['⚡ Tip 1', '⚡ Tip 2']
   },
-
   fr: { /* same structure in French */ }
 }
 ```
 
-Quiz questions follow this structure:
+### Add a module to the Client Presentation
+
+Find the `MODS` array in `odoo19_client.html` and add a new object:
 
 ```js
 {
-  mod: 'sale',         // module id this question belongs to
-  en: {
-    cat: 'Sales',      // category label shown in quiz
-    q: 'Question text?',
-    opts: ['Option A', 'Option B', 'Option C', 'Option D'],
-    a: 1,              // index of correct answer (0-based)
-    expl: 'Explanation with <strong>HTML</strong> allowed.'
+  id: 'my_module',
+  icon: '🔧',
+  cat: 'tech',               // sales | finance | invt | hr | proj | web | mfg | tech
+  cc: '#6b5a3a',             // color hex for the module accent
+  fr: {
+    name: 'Mon Module',
+    catLabel: 'Technique',
+    desc: 'Description métier en langage clair...',
+    benefits: [
+      { ico: '✅', t: 'Titre bénéfice', d: 'Description du bénéfice pour le client.' }
+    ],
+    states: ['Étape 1', '→', 'Étape 2', '→', 'Terminé'],
+    st: ['start', '', '', '', 'end'],
+    steps: [
+      { n: '1', t: 'Titre étape', d: 'Description de l\'étape.' }
+    ],
+    tips: ['Conseil pratique 1', 'Conseil pratique 2']
   },
-  fr: { /* same in French */ }
+  en: { /* same structure in English */ }
 }
 ```
 
----
+### Add quiz questions (Developer Explorer only)
 
-## Language Support
-
-The tool supports **English** and **French** simultaneously. Switching language updates:
-
-- Navigation labels
-- Hero section (title, subtitle, stat labels)
-- Search placeholder
-- Category filter buttons
-- Module card names and descriptions
-- Model names, descriptions, and field descriptions (d property)
-- Field labels (Field Name / Nom du champ, Required / Obligatoire, etc.)
-- Workflow titles, state names, and step titles/descriptions
-- Certification tips
-- Quiz questions, answer options, and explanations
-- Quiz UI labels (Start, Skip, Next, Try Again, result messages)
-- Score result feedback (4 levels based on percentage)
-
-To add a new language, duplicate the `en` block inside `T` (the translations object) and the `en` block inside each module/question object.
-
----
-
-## Quiz Engine
-
-### Question pool
-
-Currently contains **27 questions** covering all 13 modules. Questions are shuffled before each quiz session.
-
-### Scoring levels
-
-| Score | Rating |
-|---|---|
-| ≥ 90% | 🏆 Outstanding — Ready for certification |
-| ≥ 75% | 🎉 Great job — Almost exam-ready |
-| ≥ 60% | 💪 Good progress — Focus on weak modules |
-| < 60% | 😟 Keep studying — Review the modules |
-
-### Adding questions
-
-Add a new object to the `QS` array in the `<script>` section:
+Find the `QS` array in `odoo19_learning.html`:
 
 ```js
 {
-  mod: 'account',     // must match a module id
+  mod: 'my_module',
   en: {
-    cat: 'Accounting',
+    cat: 'My Category',
     q: 'Your question here?',
-    opts: ['A', 'B', 'C', 'D'],
-    a: 2,             // correct answer index
+    opts: ['Option A', 'Option B', 'Option C', 'Option D'],
+    a: 1,                    // index of correct answer (0-based)
     expl: 'Explanation with <strong>key term</strong> highlighted.'
   },
   fr: {
-    cat: 'Comptabilité',
+    cat: 'Ma Catégorie',
     q: 'Votre question ici ?',
-    opts: ['A', 'B', 'C', 'D'],
-    a: 2,
+    opts: ['Option A', 'Option B', 'Option C', 'Option D'],
+    a: 1,
     expl: 'Explication avec <strong>terme clé</strong> mis en évidence.'
   }
 }
@@ -234,97 +233,23 @@ Add a new object to the `QS` array in the `<script>` section:
 
 ---
 
-## File Structure
+## 📐 Technical Notes
 
-```
-odoo19_learning.html     ← entire application (single file)
-README.md                ← this file
-```
+| Property | Value |
+|---|---|
+| Framework | None — vanilla HTML, CSS, JavaScript |
+| External dependencies | Google Fonts only (can be removed for full offline use) |
+| Browser support | Chrome 90+, Firefox 90+, Safari 15+, Edge 90+ |
+| File sizes | `odoo19_learning.html` ~110 KB · `odoo19_client.html` ~95 KB |
+| Odoo version | 19.0 |
+| Data source | Odoo 19 official source code and documentation |
 
-The HTML file is organized internally as:
-
-```
-<head>
-  CSS styles (all inline, ~350 lines)
-
-<body>
-  <nav>              Navigation bar with lang switch
-  <div#learn-view>   Module grid + detail view
-  <div#quiz-view>    Quiz setup + active quiz + results
-
-<script>
-  T = {}             Translation strings (EN + FR)
-  MODS = []          Module data (bilingual)
-  QS = []            Quiz questions (bilingual)
-  // UI functions: setLang, showView, renderGrid, openMod,
-  //               showSec, renderModels, renderWF, renderTips,
-  //               startQuiz, renderQ, pick, showResults, resetQuiz
-```
+To make the tool fully offline, remove the `<link>` tag pointing to Google Fonts and replace font families with `system-ui, sans-serif`.
 
 ---
 
-## Customization
+## 📄 License
 
-### Add a new module
-
-1. Add a new object to the `MODS` array following the data structure above
-2. Assign it a `cat` value from: `sales`, `finance`, `inventory`, `hr`, `project`, `website`, `manufacture`, `technical`
-3. Add corresponding quiz questions to `QS`
-
-### Add a new category
-
-1. Add the category key and color to `catColors`:
-   ```js
-   const catColors = { ..., mycat: '#ff0099' };
-   ```
-2. Add the CSS class:
-   ```css
-   .cat-mycat { --cc: #ff0099; }
-   ```
-3. Add the button label to both `T.en.cats` and `T.fr.cats` arrays
-4. Add a button in the `buildCats()` function
-
-### Change the color theme
-
-Edit the CSS variables in `:root`:
-
-```css
-:root {
-  --bg: #0a0c10;        /* page background */
-  --surface: #111318;   /* card background */
-  --accent: #7c5cfc;    /* primary purple */
-  --accent2: #00d4ff;   /* cyan highlight */
-  --green: #22c55e;     /* correct answer / start state */
-  --red: #ef4444;       /* wrong answer / cancel state */
-}
-```
-
----
-
-## Technical Notes
-
-- **No build step** — plain HTML, CSS, and vanilla JavaScript
-- **No external dependencies** — Google Fonts is the only external request (can be removed for full offline use by deleting the `<link>` tag and replacing fonts with `system-ui`)
-- **Browser support** — Chrome 90+, Firefox 90+, Safari 15+, Edge 90+
-- **File size** — ~95 KB (all data + styles + logic)
-- **Odoo version** — Data reflects **Odoo 19.0** standard `addons/` folder structure
-- **Data accuracy** — Field names and types are sourced from the official Odoo 19 source code and documentation. Always cross-reference with the live source at [github.com/odoo/odoo/tree/19.0/addons](https://github.com/odoo/odoo/tree/19.0/addons)
-
----
-
-## Contributing
-
-To extend this tool:
-
-1. Open `odoo19_learning.html` in a text editor
-2. Locate the `MODS` array for module data or `QS` array for questions
-3. Follow the existing data structure
-4. Test in a browser before sharing
-
----
-
-## License
-
-This tool is provided as a free learning resource for the Odoo developer community. Content is based on publicly available Odoo 19 documentation and source code.
+Free to use and share within the Odoo community. Content is based on publicly available Odoo 19 documentation and source code.
 
 Odoo is a trademark of [Odoo S.A.](https://www.odoo.com)
