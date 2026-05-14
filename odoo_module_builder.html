@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Odoo Créateur de modules</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0f14;--surface:#161820;--surface2:#1e2029;--surface3:#252733;
+  --border:#2e3142;--border2:#3a3e55;
+  --accent:#6c63ff;--accent2:#ff6b6b;--accent3:#43e8b0;--gold:#ffd166;
+  --text:#e8e9f0;--muted:#8b8fa8;--muted2:#6b6f86;
+  --radius:10px;--radius-lg:16px;--radius-xl:24px;
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+
+/* ── TOPBAR ── */
+.topbar{
+  height:56px;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;flex-shrink:0;
+}
+.topbar-brand{display:flex;align-items:center;gap:10px}
+.tb-logo{
+  width:30px;height:30px;border-radius:8px;
+  background:linear-gradient(135deg,var(--accent),#9b59b6);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:.85rem;color:#fff;
+}
+.tb-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;color:var(--text)}
+.tb-title span{color:var(--accent)}
+.tb-badge{font-size:.6rem;padding:2px 8px;border-radius:10px;background:var(--surface3);border:1px solid var(--border2);color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.topbar-actions{display:flex;gap:10px;align-items:center}
+.mod-count{font-size:.75rem;color:var(--muted);background:var(--surface3);padding:4px 12px;border-radius:8px;border:1px solid var(--border)}
+.mod-count span{color:var(--accent3);font-weight:600}
+.btn-generate{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 22px;border-radius:var(--radius);
+  background:linear-gradient(135deg,var(--accent),#9b59b6);
+  color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;
+  border:none;cursor:pointer;transition:all .2s;
+  box-shadow:0 4px 20px rgba(108,99,255,.4);
+}
+.btn-generate:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(108,99,255,.55)}
+.btn-generate:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn-generate .ico{font-size:.9rem}
+
+/* ── LAYOUT ── */
+.workspace{display:flex;flex:1;overflow:hidden}
+
+/* ── LEFT PANEL ── */
+.left-panel{
+  width:380px;flex-shrink:0;
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.panel-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.ptab{
+  flex:1;padding:12px 8px;text-align:center;cursor:pointer;
+  font-family:'Syne',sans-serif;font-weight:600;font-size:.72rem;
+  color:var(--muted);border-bottom:2px solid transparent;transition:all .2s;
+  letter-spacing:.04em;text-transform:uppercase;
+}
+.ptab:hover{color:var(--text)}
+.ptab.active{color:var(--accent);border-bottom-color:var(--accent)}
+/* single scrollable area wrapping both tab panels */
+.panel-scroll{flex:1;overflow-y:auto;min-height:0}
+.panel-scroll::-webkit-scrollbar{width:4px}
+.panel-scroll::-webkit-scrollbar-track{background:transparent}
+.panel-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.panel-body{padding:24px;display:none}
+.panel-body.visible{display:block}
+
+/* ── FORM ELEMENTS ── */
+.form-group{margin-bottom:18px}
+.form-label{
+  display:block;font-size:.72rem;font-weight:600;color:var(--muted);
+  letter-spacing:.06em;text-transform:uppercase;margin-bottom:7px;
+}
+.form-label .req{color:var(--accent2);margin-left:3px}
+.form-input,.form-textarea,.form-select{
+  width:100%;background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:var(--radius);padding:10px 14px;
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;
+  outline:none;transition:all .2s;
+}
+.form-input:focus,.form-textarea:focus,.form-select:focus{border-color:var(--accent);background:var(--surface3)}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--muted2)}
+.form-textarea{resize:vertical;min-height:80px;line-height:1.6}
+.form-select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238b8fa8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.form-select option{background:var(--surface2)}
+
+/* IMAGE UPLOAD */
+.img-upload{
+  border:2px dashed var(--border2);border-radius:var(--radius);
+  padding:20px;text-align:center;cursor:pointer;transition:all .2s;
+  position:relative;overflow:hidden;
+}
+.img-upload:hover{border-color:var(--accent);background:rgba(108,99,255,.04)}
+.img-upload input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.img-upload-preview{
+  width:64px;height:64px;border-radius:10px;object-fit:contain;
+  margin:0 auto 8px;display:none;background:var(--surface3);padding:6px;
+}
+.img-upload-preview.show{display:block}
+.img-upload-label{font-size:.78rem;color:var(--muted);line-height:1.6}
+.img-upload-label strong{color:var(--accent);font-weight:500}
+.img-upload-name{font-size:.7rem;color:var(--accent3);margin-top:4px;display:none}
+.img-upload-name.show{display:block}
+.img-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* DIVIDER */
+.form-divider{
+  display:flex;align-items:center;gap:10px;
+  margin:24px 0 20px;
+  font-size:.68rem;font-weight:700;color:var(--muted2);letter-spacing:.1em;text-transform:uppercase;
+}
+.form-divider::before,.form-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* REPEATABLE FIELDS */
+.repeat-group{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px;position:relative}
+.repeat-group-title{font-size:.75rem;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.btn-remove-group{
+  background:none;border:none;cursor:pointer;color:var(--muted2);font-size:.9rem;
+  transition:color .2s;padding:2px 4px;border-radius:4px;
+}
+.btn-remove-group:hover{color:var(--accent2);background:rgba(255,107,107,.08)}
+.inline-group{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* STEPS LIST */
+.steps-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.step-item{display:flex;gap:8px;align-items:flex-start}
+.step-num{
+  width:26px;height:26px;border-radius:50%;background:var(--accent)22;
+  border:1px solid var(--accent)44;color:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.68rem;font-weight:700;flex-shrink:0;margin-top:2px;
+}
+.step-fields{flex:1;display:flex;flex-direction:column;gap:6px}
+.btn-add-step{
+  width:100%;padding:7px;border-radius:var(--radius);
+  background:transparent;border:1.5px dashed var(--border2);
+  color:var(--muted);font-size:.75rem;font-weight:500;cursor:pointer;
+  transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn-add-step:hover{border-color:var(--accent);color:var(--accent)}
+.btn-remove-step{background:none;border:none;cursor:pointer;color:var(--muted2);font-size:.8rem;padding:4px;border-radius:4px;flex-shrink:0;transition:color .2s;margin-top:2px}
+.btn-remove-step:hover{color:var(--accent2)}
+
+/* TIPS */
+.tips-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.tip-item-row{display:flex;gap:8px;align-items:center}
+.tip-item-row .form-input{flex:1}
+.btn-add-tip{
+  width:100%;padding:7px;border-radius:var(--radius);
+  background:transparent;border:1.5px dashed var(--border2);
+  color:var(--muted);font-size:.75rem;font-weight:500;cursor:pointer;
+  transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn-add-tip:hover{border-color:var(--gold);color:var(--gold)}
+
+/* BOTTOM ACTION */
+.panel-footer{
+  border-top:1px solid var(--border);padding:16px 24px;flex-shrink:0;
+  display:flex;gap:10px;
+}
+.btn-save{
+  padding:11px 24px;border-radius:var(--radius);
+  background:linear-gradient(135deg,#43e8b0,#27ae60);
+  color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;
+  border:none;cursor:pointer;transition:all .2s;
+  box-shadow:0 4px 16px rgba(67,232,176,.35);white-space:nowrap;
+  text-shadow:0 1px 2px rgba(0,0,0,.25);
+}
+.btn-save:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(67,232,176,.5);filter:brightness(1.08)}
+.btn-clear{
+  padding:11px 18px;border-radius:var(--radius);
+  background:transparent;border:1.5px solid var(--border2);
+  color:var(--muted);font-family:'Syne',sans-serif;font-weight:600;font-size:.82rem;
+  cursor:pointer;transition:all .2s;
+}
+.btn-clear:hover{border-color:var(--accent2);color:var(--accent2)}
+
+/* ── RIGHT PANEL ── */
+.right-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.preview-topbar{
+  height:48px;background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;flex-shrink:0;
+}
+.preview-title{font-size:.78rem;font-weight:600;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.preview-title::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--accent3);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.preview-actions{display:flex;gap:8px}
+.btn-sm{
+  padding:5px 14px;border-radius:7px;font-size:.72rem;font-weight:600;
+  font-family:'Syne',sans-serif;cursor:pointer;border:none;transition:all .2s;
+}
+.btn-sm-outline{background:transparent;border:1px solid var(--border2);color:var(--muted)}
+.btn-sm-outline:hover{border-color:var(--accent);color:var(--accent)}
+
+/* MODULES PREVIEW AREA */
+.modules-preview{flex:1;overflow-y:auto;padding:24px}
+.modules-preview::-webkit-scrollbar{width:4px}
+.modules-preview::-webkit-scrollbar-track{background:transparent}
+.modules-preview::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;text-align:center;
+}
+.empty-ico{font-size:3.5rem;margin-bottom:16px;opacity:.3}
+.empty-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:var(--muted);margin-bottom:8px}
+.empty-sub{font-size:.82rem;color:var(--muted2);max-width:320px;line-height:1.7}
+
+/* MODULE PREVIEW CARD */
+.mod-preview-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  margin-bottom:14px;overflow:hidden;transition:all .2s;
+}
+.mod-preview-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;cursor:pointer;
+}
+.mod-preview-left{display:flex;align-items:center;gap:12px}
+.mod-preview-icon{
+  width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:1.2rem;
+  background:var(--surface3);border:1px solid var(--border2);flex-shrink:0;
+}
+.mod-preview-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem}
+.mod-preview-cat{font-size:.68rem;color:var(--muted);margin-top:2px}
+.mod-preview-right{display:flex;align-items:center;gap:8px}
+.mod-pill{font-size:.62rem;padding:3px 8px;border-radius:6px;background:var(--surface3);color:var(--muted);border:1px solid var(--border2);font-weight:600}
+.mod-pill.has{background:rgba(67,232,176,.1);color:var(--accent3);border-color:rgba(67,232,176,.2)}
+.mod-preview-actions{display:flex;gap:4px}
+.btn-mod-action{
+  background:none;border:1px solid var(--border2);border-radius:6px;
+  padding:4px 8px;font-size:.7rem;color:var(--muted);cursor:pointer;transition:all .2s;
+}
+.btn-mod-action:hover{color:var(--text);border-color:var(--border)60}
+.btn-mod-action.del:hover{color:var(--accent2);border-color:var(--accent2)60}
+.mod-preview-body{
+  padding:0 20px 16px;display:none;
+  border-top:1px solid var(--border);
+}
+.mod-preview-body.open{display:block;padding-top:14px}
+.mpb-section{margin-bottom:12px}
+.mpb-label{font-size:.68rem;font-weight:700;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.mpb-content{font-size:.8rem;color:var(--muted);line-height:1.7}
+.mpb-chips{display:flex;flex-wrap:wrap;gap:6px}
+.mpb-chip{font-size:.72rem;padding:4px 10px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--muted2)}
+
+/* project info bar */
+.proj-info-bar{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:16px 20px;margin-bottom:18px;display:none;
+}
+.proj-info-bar.show{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.proj-logo-wrap{display:flex;align-items:center;gap:8px}
+.proj-logo-img{width:36px;height:36px;object-fit:contain;border-radius:8px;background:var(--surface3);padding:4px}
+.proj-logo-placeholder{width:36px;height:36px;border-radius:8px;background:var(--surface3);border:1px dashed var(--border2);display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--muted2)}
+.proj-info-text .proj-headline{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem}
+.proj-info-text .proj-desc{font-size:.75rem;color:var(--muted);margin-top:2px}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:28px;right:28px;z-index:999;
+  background:var(--surface3);border:1px solid var(--border2);
+  border-radius:var(--radius-lg);padding:12px 18px;
+  display:flex;align-items:center;gap:10px;
+  font-size:.8rem;color:var(--text);
+  transform:translateY(20px);opacity:0;
+  transition:all .3s cubic-bezier(.4,0,.2,1);pointer-events:none;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-ico{font-size:1rem}
+
+/* SCROLLBAR global */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-xl);padding:32px;width:min(560px,94vw);max-height:88vh;overflow-y:auto}
+.modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;margin-bottom:6px}
+.modal-sub{font-size:.82rem;color:var(--muted);margin-bottom:24px;line-height:1.6}
+.modal-actions{display:flex;gap:10px;margin-top:28px}
+
+.progress-bar{width:100%;height:3px;background:var(--surface3);border-radius:2px;overflow:hidden;margin-bottom:20px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));transition:width .4s ease;width:0%}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="tb-logo">O</div>
+    <div class="tb-title">Odoo <span>Créateur de modules</span></div>
+    <span class="tb-badge">Générateur</span>
+  </div>
+  <div class="topbar-actions">
+    <div class="mod-count">Modules : <span id="mod-count-num">0</span></div>
+    <button class="btn-generate" id="btn-generate" onclick="openGenerateModal()" disabled>
+      <span class="ico">⚡</span> Générer HTML
+    </button>
+  </div>
+</div>
+
+<!-- WORKSPACE -->
+<div class="workspace">
+
+  <!-- LEFT: FORM PANEL -->
+  <div class="left-panel">
+    <div class="panel-tabs">
+      <div class="ptab active" onclick="switchTab('project',this)">Projet</div>
+      <div class="ptab" onclick="switchTab('module',this)">Ajouter un module</div>
+    </div>
+
+    <!-- SCROLLABLE WRAPPER -->
+    <div class="panel-scroll">
+    <!-- PROJECT TAB -->
+    <div class="panel-body visible" id="tab-project">
+      <div class="form-group">
+        <label class="form-label">Titre de la page (onglet)<span class="req">*</span></label>
+        <input type="text" class="form-input" id="proj-title" placeholder="ex. Notre solution Odoo" oninput="updateProjectPreview()">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Titre principal (H1)<span class="req">*</span></label>
+        <input type="text" class="form-input" id="proj-h1" placeholder="ex. Votre entreprise, propulsée par Odoo" oninput="updateProjectPreview()">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Sous-titre / Description</label>
+        <textarea class="form-textarea" id="proj-desc" placeholder="Une courte description affichée sous le titre…" oninput="updateProjectPreview()" style="min-height:70px"></textarea>
+      </div>
+
+      <div class="form-divider">Logos</div>
+
+      <div class="img-row">
+        <div class="form-group">
+          <label class="form-label">Logo société</label>
+          <div class="img-upload" id="company-upload-wrap">
+            <input type="file" id="company-logo-input" accept="image/*" onchange="handleLogo(this,'company')">
+            <img class="img-upload-preview" id="company-logo-preview" src="" alt="">
+            <div class="img-upload-label"><strong>Cliquer</strong><br>pour importer</div>
+            <div class="img-upload-name" id="company-logo-name"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Logo client</label>
+          <div class="img-upload" id="client-upload-wrap">
+            <input type="file" id="client-logo-input" accept="image/*" onchange="handleLogo(this,'client')">
+            <img class="img-upload-preview" id="client-logo-preview" src="" alt="">
+            <div class="img-upload-label"><strong>Cliquer</strong><br>pour importer</div>
+            <div class="img-upload-name" id="client-logo-name"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-divider">Style</div>
+
+      <div class="form-group">
+        <label class="form-label">Couleur principale</label>
+        <div style="display:flex;gap:10px;align-items:center">
+          <input type="color" id="proj-color" value="#2d5a3d" style="width:44px;height:36px;border:none;background:none;cursor:pointer;padding:0;border-radius:8px">
+          <input type="text" class="form-input" id="proj-color-hex" value="#2d5a3d" placeholder="#2d5a3d" style="flex:1" oninput="syncColorFromHex()">
+        </div>
+      </div>
+      <div id="proj-color-input-sync" style="display:none"></div>
+    </div>
+
+    <!-- MODULE TAB -->
+    <div class="panel-body" id="tab-module">
+
+      <div class="inline-group">
+        <div class="form-group">
+          <label class="form-label">Icône (emoji)<span class="req">*</span></label>
+          <input type="text" class="form-input" id="mod-icon" placeholder="📊" maxlength="4">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Catégorie<span class="req">*</span></label>
+          <select class="form-select" id="mod-cat">
+            <option value="sales">Ventes</option>
+            <option value="finance">Finance</option>
+            <option value="logistics">Logistique</option>
+            <option value="hr">RH</option>
+            <option value="project">Projets</option>
+            <option value="web">Web</option>
+            <option value="mfg">Fabrication</option>
+            <option value="collab">Collaboration</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Nom du module<span class="req">*</span></label>
+        <input type="text" class="form-input" id="mod-name" placeholder="ex. Comptabilité">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description courte<span class="req">*</span></label>
+        <textarea class="form-textarea" id="mod-desc" placeholder="Ce que ce module apporte au client…"></textarea>
+      </div>
+
+      <div class="form-divider">Fonctionnalités (Bénéfices)</div>
+      <div id="benefits-list"></div>
+      <button class="btn-add-step" onclick="addBenefit()" style="margin-bottom:8px">＋ Ajouter une fonctionnalité</button>
+
+      <div class="form-divider">Comment ça fonctionne (Étapes)</div>
+      <div class="steps-list" id="steps-list"></div>
+      <button class="btn-add-step" onclick="addStep()">＋ Ajouter une étape</button>
+
+      <div class="form-divider">Bons à savoir (Conseils)</div>
+      <div class="tips-list" id="tips-list"></div>
+      <button class="btn-add-tip" onclick="addTip()">＋ Ajouter un conseil</button>
+
+    </div>
+    </div><!-- end panel-scroll -->
+
+    <!-- FOOTER -->
+    <div class="panel-footer" id="panel-footer-module" style="display:none">
+      <button class="btn-clear" onclick="clearModuleForm()">Effacer</button>
+      <button class="btn-save" onclick="saveModule()" style="flex:1" id="btn-save-module">✓ Enregistrer le module</button>
+    </div>
+  </div>
+
+  <!-- RIGHT: PREVIEW -->
+  <div class="right-panel">
+    <div class="preview-topbar">
+      <div class="preview-title">Aperçu en direct</div>
+      <div class="preview-actions">
+        <button class="btn-sm btn-sm-outline" onclick="resetToDefaults()" title="Restaurer les 12 modules Odoo par défaut">↺ Réinitialiser</button>
+        <button class="btn-sm btn-sm-outline" onclick="clearAll()" style="color:#ff6b6b;border-color:#ff6b6b44">🗑 Tout effacer</button>
+      </div>
+    </div>
+    <div class="modules-preview" id="modules-preview">
+      <div class="proj-info-bar" id="proj-info-bar">
+        <div class="proj-logo-wrap">
+          <div class="proj-logo-placeholder" id="company-logo-bar">Co</div>
+          <div class="proj-logo-placeholder" id="client-logo-bar">Cl</div>
+        </div>
+        <div class="proj-info-text">
+          <div class="proj-headline" id="proj-preview-h1">—</div>
+          <div class="proj-desc" id="proj-preview-desc">—</div>
+        </div>
+      </div>
+      <div id="modules-list-preview">
+        <div class="empty-state" id="empty-state">
+          <div class="empty-ico">🧩</div>
+          <div class="empty-title">Aucun module pour l'instant</div>
+          <div class="empty-sub">Allez dans l'onglet "Ajouter un module", renseignez les informations et cliquez sur Enregistrer.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GENERATE MODAL -->
+<div class="modal-overlay" id="gen-modal">
+  <div class="modal">
+    <div class="modal-title">⚡ Générer HTML</div>
+    <div class="modal-sub">Votre présentation est prête à être exportée. Vérifiez le résumé ci-dessous puis cliquez sur Générer.</div>
+    <div class="progress-bar"><div class="progress-fill" id="gen-progress"></div></div>
+    <div id="gen-summary" style="font-size:.82rem;color:var(--muted);line-height:1.9"></div>
+    <div class="modal-actions">
+      <button class="btn-clear" style="flex:1;padding:11px" onclick="closeGenerateModal()">Annuler</button>
+      <button class="btn-save" style="flex:2;padding:11px" id="btn-do-generate" onclick="doGenerate()">⬇ Télécharger HTML</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span class="toast-ico" id="toast-ico">✅</span><span id="toast-msg"></span></div>
+
+<script>
+/* ══════════════════════
+   STATE
+══════════════════════ */
+/* ── DEFAULT MODULES (pre-loaded from odoo19_client.html) ── */
+const DEFAULT_MODULES = [
+  {id:"sale",icon:"🛒",cat:"sales",cc:"#1e3a5f",name:"Ventes",desc:"Gérez l'intégralité de votre processus commercial, du premier contact avec le client jusqu'à la facturation finale, en passant par l'élaboration des offres commerciales.",benefits:[{ico:"💼",t:"Devis professionnels",d:"Créez des offres commerciales personnalisées et envoyez-les directement à vos clients en quelques clics."},{ico:"📈",t:"Suivi des commandes",d:"Visualisez en temps réel l'état de chaque commande et anticipez vos livraisons et facturations."},{ico:"🏷️",t:"Gestion des prix",d:"Appliquez des remises, des listes de prix spéciales ou des promotions selon le profil de chaque client."},{ico:"🔗",t:"Connexion totale",d:"Vos commandes alimentent automatiquement le stock, la livraison et la comptabilité sans ressaisie."}],steps:[{n:"1",t:"Création du devis",d:"Votre commercial prépare une offre avec les produits, quantités et tarifs adaptés au client."},{n:"2",t:"Envoi et négociation",d:"Le devis est envoyé par email directement depuis Odoo. Le client peut le valider en ligne."},{n:"3",t:"Confirmation de la commande",d:"Une fois acceptée, la commande est confirmée et déclenche automatiquement la préparation."},{n:"4",t:"Livraison",d:"Le bon de livraison est généré automatiquement pour l'entrepôt."},{n:"5",t:"Facturation",d:"La facture est créée en un clic depuis la commande et envoyée au client."}],tips:["Configurez vos listes de prix par segment de clients pour gagner du temps.","La politique de facturation peut être définie par commande ou par livraison selon votre activité.","Les équipes commerciales permettent de suivre les performances de chaque vendeur."]},
+  {id:"crm",icon:"🎯",cat:"sales",cc:"#1e3a5f",name:"CRM",desc:"Centralisez toutes vos opportunités commerciales dans un pipeline visuel. Ne laissez plus passer aucune piste et gardez un historique complet de chaque relation client.",benefits:[{ico:"🗂️",t:"Pipeline visuel",d:"Visualisez toutes vos opportunités sur un tableau kanban et faites glisser les cartes d'une étape à l'autre."},{ico:"📞",t:"Historique complet",d:"Chaque appel, email et réunion est enregistré sur la fiche client pour un suivi sans faille."},{ico:"🤖",t:"Scoring automatique",d:"Odoo calcule la probabilité de succès de chaque opportunité pour que vous priorisiez les bonnes affaires."},{ico:"👥",t:"Équipes commerciales",d:"Répartissez les pistes entre vos commerciaux et suivez les performances de chaque équipe en temps réel."}],steps:[{n:"1",t:"Réception d'une piste",d:"Une piste entre dans Odoo via votre site web, un email entrant ou une saisie manuelle."},{n:"2",t:"Qualification",d:"Le commercial évalue la piste et la convertit en opportunité avec un montant et une date de clôture estimée."},{n:"3",t:"Suivi et relances",d:"Des activités sont planifiées (appel, email, réunion) pour maintenir le contact avec le prospect."},{n:"4",t:"Envoi d'une proposition",d:"Un devis est généré directement depuis l'opportunité et envoyé au client."},{n:"5",t:"Clôture",d:"L'opportunité est marquée Gagnée ou Perdue avec une raison, pour améliorer les futures stratégies."}],tips:["Configurez des étapes de pipeline personnalisées pour coller à votre processus de vente.","Le module CRM est directement connecté au module Ventes pour créer des devis en un clic.","Les pistes perdues avec une raison renseignée vous aident à améliorer votre taux de conversion."]},
+  {id:"account",icon:"📊",cat:"finance",cc:"#2d5a3d",name:"Comptabilité",desc:"Une solution comptable complète intégrée à votre gestion. Facturation, rapprochement bancaire, déclarations fiscales et tableaux de bord financiers, tout en un.",benefits:[{ico:"🧾",t:"Facturation automatique",d:"Générez vos factures client directement depuis les commandes sans ressaisie. Envoyez-les par email en un clic."},{ico:"🏦",t:"Rapprochement bancaire",d:"Importez vos relevés bancaires et Odoo rapproche automatiquement les transactions avec vos écritures."},{ico:"📉",t:"Tableaux de bord",d:"Suivez votre trésorerie, vos créances et vos dettes en temps réel sur un tableau de bord intuitif."},{ico:"🌍",t:"Multi-devises & TVA",d:"Gérez plusieurs devises et configurez vos règles de TVA selon chaque pays ou type de prestation."}],steps:[{n:"1",t:"Création de la facture",d:"La facture est générée automatiquement depuis une commande ou saisie manuellement."},{n:"2",t:"Validation",d:"La facture est confirmée, un numéro lui est attribué et les écritures comptables sont créées."},{n:"3",t:"Envoi au client",d:"La facture PDF est envoyée par email directement depuis Odoo avec un lien de paiement en ligne."},{n:"4",t:"Suivi des paiements",d:"Odoo relance automatiquement les factures impayées selon un calendrier paramétrable."},{n:"5",t:"Encaissement",d:"Le paiement reçu est rapproché de la facture. Le solde client se met à jour automatiquement."}],tips:["Connectez votre banque directement pour un import automatique des relevés.","Les positions fiscales permettent d'adapter automatiquement la TVA selon le pays de votre client.","Les rapports financiers (bilan, compte de résultat) sont générés en temps réel sans export."]},
+  {id:"stock",icon:"📦",cat:"invt",cc:"#c8873a",name:"Inventaire & Stock",desc:"Gardez le contrôle total de vos stocks en temps réel. Gérez vos entrepôts, suivez les mouvements de marchandises et optimisez vos réapprovisionnements.",benefits:[{ico:"📍",t:"Traçabilité complète",d:"Suivez chaque produit par lot ou numéro de série, de la réception à la livraison finale."},{ico:"🔄",t:"Réapprovisionnement automatique",d:"Définissez des seuils minimum. Odoo génère automatiquement les demandes d'achat quand le stock est bas."},{ico:"🏭",t:"Multi-entrepôts",d:"Gérez plusieurs sites de stockage, déplacez des marchandises entre entrepôts et optimisez votre logistique."},{ico:"📋",t:"Inventaires simplifiés",d:"Réalisez vos inventaires périodiques ou tournants directement depuis une tablette ou un scanner."}],steps:[{n:"1",t:"Déclenchement",d:"Un bon de livraison ou de réception est généré automatiquement depuis une commande client ou fournisseur."},{n:"2",t:"Réservation du stock",d:"Odoo vérifie la disponibilité et réserve les produits nécessaires dans l'entrepôt concerné."},{n:"3",t:"Préparation",d:"L'opérateur prépare la commande, scan les produits et valide les quantités prélevées."},{n:"4",t:"Expédition",d:"Les marchandises sont expédiées et le stock se met à jour instantanément."}],tips:["Les routes multi-étapes permettent de gérer des flux complexes (prélèvement → emballage → expédition).","La traçabilité par numéro de série est indispensable pour les produits soumis à des obligations réglementaires.","Connectez une douchette ou une tablette pour valider les opérations directement dans l'entrepôt."]},
+  {id:"purchase",icon:"🏪",cat:"invt",cc:"#c8873a",name:"Achats",desc:"Simplifiez et sécurisez vos processus d'achat. Comparez les offres fournisseurs, gérez les approbations et suivez l'exécution des commandes jusqu'à la réception.",benefits:[{ico:"🤝",t:"Gestion des fournisseurs",d:"Centralisez vos contacts fournisseurs avec leurs tarifs, conditions et historique de commandes."},{ico:"✅",t:"Circuits d'approbation",d:"Définissez des règles de validation selon les montants. Les achats importants nécessitent une approbation hiérarchique."},{ico:"📊",t:"Comparaison d'offres",d:"Envoyez une demande de prix à plusieurs fournisseurs simultanément et comparez les réponses en un tableau."},{ico:"🔗",t:"Réception intégrée",d:"À la réception des marchandises, Odoo met à jour automatiquement le stock et prépare la facture fournisseur."}],steps:[{n:"1",t:"Demande de prix",d:"Créez une demande de prix et envoyez-la à un ou plusieurs fournisseurs pour comparaison."},{n:"2",t:"Confirmation",d:"Choisissez la meilleure offre et confirmez le bon de commande. Le fournisseur en est informé automatiquement."},{n:"3",t:"Suivi de livraison",d:"Suivez l'avancement de la commande et recevez des alertes en cas de retard."},{n:"4",t:"Réception",d:"À la livraison, les quantités reçues sont validées et le stock est mis à jour."},{n:"5",t:"Facturation fournisseur",d:"La facture du fournisseur est rapprochée de la commande et de la réception pour un contrôle à 3 voies."}],tips:["Définissez des budgets d'achat par département pour mieux contrôler vos dépenses.","Les conditions fournisseurs (tarifs, délais minimum) sont mémorisées et proposées automatiquement lors des prochaines commandes.","Le contrôle à 3 voies (commande / réception / facture) est une garantie contre les erreurs de facturation."]},
+  {id:"hr",icon:"👥",cat:"hr",cc:"#7b4f8e",name:"Ressources Humaines",desc:"Gérez l'ensemble du cycle de vie de vos collaborateurs : recrutement, intégration, contrats, évaluations et formation, le tout dans un espace unique et sécurisé.",benefits:[{ico:"🗂️",t:"Fiches employés",d:"Un dossier complet par collaborateur : informations personnelles, contrat, documents, compétences et historique."},{ico:"🏢",t:"Organigramme",d:"Visualisez la structure de votre organisation et naviguez facilement d'un département à l'autre."},{ico:"📄",t:"Gestion des contrats",d:"Créez et gérez les contrats de travail avec alertes automatiques à l'approche des échéances."},{ico:"🔒",t:"Confidentialité",d:"Les données personnelles sensibles sont protégées par des droits d'accès stricts selon les profils utilisateurs."}],steps:[{n:"1",t:"Recrutement",d:"Publiez vos offres d'emploi, recevez les candidatures et gérez le processus de sélection."},{n:"2",t:"Création du dossier",d:"À l'embauche, la fiche employé est créée avec toutes ses informations personnelles et professionnelles."},{n:"3",t:"Contrat & accès",d:"Le contrat est rédigé et l'accès au système est configuré selon le rôle de l'employé."},{n:"4",t:"Suivi et développement",d:"Évaluations périodiques, formations et montées en compétence sont planifiées et tracées."},{n:"5",t:"Départ",d:"En cas de départ, le dossier est archivé et les accès sont révoqués automatiquement."}],tips:["L'organigramme est généré automatiquement à partir des liens hiérarchiques entre employés.","Les alertes d'expiration de contrat permettent d'anticiper les renouvellements ou fins de mission.","Les droits d'accès garantissent que seuls les RH voient les données sensibles (salaires, données privées)."]},
+  {id:"leave",icon:"🏖️",cat:"hr",cc:"#7b4f8e",name:"Congés & Absences",desc:"Simplifiez la gestion des congés pour toute votre organisation. Demandes en ligne, approbations en un clic, soldes en temps réel — plus aucun suivi sur papier.",benefits:[{ico:"📅",t:"Demandes en ligne",d:"Les employés soumettent leurs congés depuis leur espace personnel. Les responsables valident depuis le leur."},{ico:"⚖️",t:"Soldes automatiques",d:"Les droits à congés sont calculés et mis à jour automatiquement. Chaque employé voit son solde disponible."},{ico:"📊",t:"Planification d'équipe",d:"Visualisez les absences de toute l'équipe sur un calendrier partagé pour anticiper les manques d'effectif."},{ico:"🔔",t:"Notifications automatiques",d:"Le manager est prévenu dès qu'une demande est soumise. L'employé est notifié de chaque décision."}],steps:[{n:"1",t:"Demande de congé",d:"L'employé sélectionne le type de congé, les dates et soumet sa demande en quelques secondes."},{n:"2",t:"Notification du responsable",d:"Le manager reçoit une alerte et peut consulter le planning avant de prendre sa décision."},{n:"3",t:"Approbation ou refus",d:"En un clic, le responsable valide ou refuse la demande avec la possibilité d'ajouter un motif."},{n:"4",t:"Mise à jour automatique",d:"Le solde de congés de l'employé est mis à jour et les absences apparaissent dans le calendrier d'équipe."}],tips:["Configurez plusieurs types de congés : RTT, congés payés, sans solde, formation, etc.","Les plans d'acquisition permettent d'accumuler des congés au prorata du temps travaillé.","L'intégration avec la paie garantit que les absences sont correctement prises en compte dans le calcul du salaire."]},
+  {id:"project",icon:"📋",cat:"proj",cc:"#2a6b8a",name:"Projets",desc:"Pilotez vos projets avec clarté. Attribuez des tâches, suivez l'avancement, respectez les délais et collaborez efficacement avec vos équipes et vos clients.",benefits:[{ico:"🗓️",t:"Planification visuelle",d:"Utilisez la vue kanban, Gantt ou liste pour planifier vos projets et suivre l'avancement en temps réel."},{ico:"⏱️",t:"Suivi du temps",d:"Vos équipes saisissent leurs heures directement sur les tâches. Comparez prévu et réalisé à tout moment."},{ico:"💰",t:"Facturation au temps passé",d:"Transformez les heures travaillées en factures client automatiquement, sans ressaisie."},{ico:"🤝",t:"Portail client",d:"Offrez à vos clients un accès en lecture à l'avancement de leur projet pour plus de transparence."}],steps:[{n:"1",t:"Création du projet",d:"Définissez le projet, ajoutez les membres de l'équipe et configurez les étapes de votre processus."},{n:"2",t:"Création des tâches",d:"Décomposez le projet en tâches avec un responsable, une date limite et une estimation en heures."},{n:"3",t:"Exécution et suivi",d:"L'équipe avance sur les tâches, saisit ses heures et fait glisser les tâches dans les colonnes du kanban."},{n:"4",t:"Validation client",d:"Le client peut consulter l'avancement sur son portail et valider les livrables."},{n:"5",t:"Clôture et facturation",d:"À la fin du projet, les heures sont compilées et transformées en facture en un clic."}],tips:["Les jalons vous permettent de marquer les grandes étapes d'un projet et de les partager avec le client.","Configurez des alertes automatiques si une tâche est en retard par rapport à sa date limite.","La vue Gantt est idéale pour présenter le planning d'un projet à vos clients lors de réunions."]},
+  {id:"website",icon:"🌐",cat:"web",cc:"#c0392b",name:"Site Web & E-commerce",desc:"Créez votre site web professionnel et votre boutique en ligne sans aucune compétence technique. Publiez des pages, vendez des produits et gérez vos commandes en ligne.",benefits:[{ico:"✏️",t:"Éditeur glisser-déposer",d:"Construisez vos pages web visuellement en glissant des blocs de contenu, sans toucher une seule ligne de code."},{ico:"🛍️",t:"Boutique intégrée",d:"Votre catalogue produit Odoo est synchronisé automatiquement avec votre boutique en ligne."},{ico:"📱",t:"Design responsive",d:"Votre site s'adapte automatiquement aux téléphones, tablettes et ordinateurs pour une expérience optimale."},{ico:"📈",t:"SEO & Analytics",d:"Des outils SEO intégrés et une connexion Google Analytics pour optimiser votre visibilité et mesurer vos résultats."}],steps:[{n:"1",t:"Visite et navigation",d:"Le client navigue dans votre boutique, consulte les fiches produits et ajoute des articles à son panier."},{n:"2",t:"Passage à la caisse",d:"Le client renseigne ses coordonnées de livraison et choisit son mode de livraison."},{n:"3",t:"Paiement en ligne",d:"Le client paye par carte bancaire, virement ou tout autre moyen de paiement configuré."},{n:"4",t:"Traitement de la commande",d:"La commande apparaît automatiquement dans Odoo pour être préparée et expédiée."},{n:"5",t:"Livraison et suivi",d:"Le client reçoit un email de confirmation avec le suivi de livraison."}],tips:["Le référencement naturel (SEO) est paramétrable page par page directement depuis l'éditeur.","Les promotions et codes promo se configurent facilement et s'appliquent automatiquement en caisse.","La boutique en ligne est reliée en temps réel au stock : un article épuisé est automatiquement indisponible."]},
+  {id:"mrp",icon:"🏭",cat:"mfg",cc:"#5a7a3a",name:"Fabrication",desc:"Planifiez et pilotez votre production de A à Z. Nomenclatures, ordres de fabrication, planification des ressources et suivi en temps réel de chaque ligne de production.",benefits:[{ico:"📐",t:"Nomenclatures produits",d:"Définissez la recette de fabrication de chaque produit : composants nécessaires, quantités et opérations."},{ico:"📅",t:"Planification de la production",d:"Planifiez les ordres de fabrication selon les capacités de vos postes de charge et les délais de livraison."},{ico:"📊",t:"Suivi en temps réel",d:"Suivez l'avancement de chaque ordre de fabrication et identifiez immédiatement les goulots d'étranglement."},{ico:"🔗",t:"Intégration totale",d:"La production consomme automatiquement les composants du stock et génère les produits finis."}],steps:[{n:"1",t:"Planification",d:"Un ordre de fabrication est créé depuis une commande client ou manuellement, avec la nomenclature et la quantité."},{n:"2",t:"Lancement",d:"L'ordre est confirmé, les composants sont réservés dans le stock et les opérations sont planifiées."},{n:"3",t:"Production",d:"Les opérateurs suivent les instructions de fabrication et enregistrent les quantités produites."},{n:"4",t:"Contrôle qualité",d:"Des points de contrôle qualité peuvent être insérés à chaque étape du processus de fabrication."},{n:"5",t:"Clôture",d:"Les produits finis entrent en stock et les composants consommés sont déduits automatiquement."}],tips:["Les nomenclatures de type \"kit\" permettent de vendre des ensembles qui sont assemblés à la commande.","La sous-traitance permet de confier une partie de la production à un prestataire externe tout en gardant le contrôle dans Odoo.","Connectez des outils IoT (balances, machines) pour saisir automatiquement les quantités produites."]},
+  {id:"payroll",icon:"💰",cat:"hr",cc:"#7b4f8e",name:"Paie",desc:"Automatisez votre traitement de la paie et restez en conformité avec la réglementation. Générez les bulletins, gérez les cotisations et produisez vos déclarations sociales.",benefits:[{ico:"🧮",t:"Calcul automatique",d:"Salaires, primes, déductions, cotisations : tout est calculé automatiquement selon les règles paramétrées."},{ico:"📄",t:"Bulletins dématérialisés",d:"Générez et envoyez les bulletins de salaire directement depuis Odoo. Les employés y accèdent depuis leur espace."},{ico:"🏛️",t:"Conformité légale",d:"Les règles de calcul sont mises à jour pour rester conformes aux évolutions de la législation sociale."},{ico:"📊",t:"Reporting RH",d:"Analysez la masse salariale par département, type de contrat ou période pour piloter votre budget RH."}],steps:[{n:"1",t:"Préparation",d:"Le bulletin est créé pour la période concernée avec le contrat et la structure salariale de l'employé."},{n:"2",t:"Calcul",d:"Odoo applique automatiquement toutes les règles salariales : brut, cotisations, net à payer."},{n:"3",t:"Vérification",d:"Le gestionnaire RH contrôle les bulletins avant de les valider."},{n:"4",t:"Validation et comptabilisation",d:"À la validation, les bulletins sont verrouillés et les écritures comptables sont générées automatiquement."},{n:"5",t:"Paiement",d:"Les ordres de virement sont préparés et envoyés à la banque. Les bulletins sont mis à disposition des employés."}],tips:["Regroupez les employés par structure salariale pour gérer facilement différentes catégories de personnel (cadres, non-cadres, etc.).","La connexion avec le module Congés garantit que les absences sont automatiquement prises en compte dans le calcul du salaire.","Générez vos déclarations sociales directement depuis Odoo pour simplifier vos obligations administratives."]},
+  {id:"discuss",icon:"💬",cat:"tech",cc:"#6b5a3a",name:"Discussion & Messagerie",desc:"Communiquez efficacement au sein de votre organisation. Messages instantanés, canaux par équipe, partage de fichiers et historique des conversations, tout en un.",benefits:[{ico:"💬",t:"Messagerie instantanée",d:"Échangez avec vos collègues en direct, créez des canaux par projet ou par équipe et retrouvez tout l'historique."},{ico:"📎",t:"Chatter intégré",d:"Sur chaque document Odoo (commande, facture, tâche), un fil de discussion dédié permet de collaborer en contexte."},{ico:"🔔",t:"Activités & rappels",d:"Planifiez des activités (appel, email, réunion) directement sur les enregistrements et ne manquez plus aucune échéance."},{ico:"📧",t:"Passerelle email",d:"Recevez et envoyez des emails directement depuis Odoo. Les réponses s'attachent automatiquement au bon dossier."}],steps:[{n:"1",t:"Communication en contexte",d:"Sur n'importe quel enregistrement Odoo, cliquez sur \"Envoyer un message\" pour communiquer directement dans le contexte."},{n:"2",t:"Planification d'activité",d:"Planifiez une action future (rappel, réunion, email) avec une date limite et un responsable."},{n:"3",t:"Notification",d:"Le destinataire reçoit une notification et peut répondre directement depuis son interface."},{n:"4",t:"Historique complet",d:"Tout l'historique des échanges est conservé sur le dossier pour une traçabilité totale."}],tips:["Abonnez des collègues à un dossier pour qu'ils reçoivent automatiquement les mises à jour importantes.","Les activités en retard apparaissent en rouge dans le tableau de bord pour ne jamais manquer une relance.","Créez des canaux de discussion thématiques (Ventes, Support, Direction) pour organiser vos communications."]}
+];
+
+const state = {
+  title: '',
+  h1: '',
+  desc: '',
+  color: '#2d5a3d',
+  companyLogo: null,   // base64
+  clientLogo: null,    // base64
+  modules: DEFAULT_MODULES.map(m => ({...m})),  // clone defaults
+  editingId: null,
+};
+
+const catColors = {
+  sales:'#1e3a5f', finance:'#2d5a3d', logistics:'#c8873a',
+  hr:'#7b4f8e', project:'#2a6b8a', web:'#c0392b',
+  mfg:'#5a7a3a', collab:'#6b5a3a'
+};
+
+const catLabels = {
+  sales:'Ventes', finance:'Finance', logistics:'Logistique',
+  hr:'Ressources Humaines', project:'Projets', web:'Web & E-commerce',
+  mfg:'Fabrication', collab:'Collaboration'
+};
+
+let benefitCount = 0, stepCount = 0, tipCount = 0;
+
+/* ══════════════════════
+   TABS
+══════════════════════ */
+function switchTab(tab, btn) {
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-project').classList.toggle('visible', tab === 'project');
+  document.getElementById('tab-module').classList.toggle('visible', tab === 'module');
+  document.getElementById('panel-footer-module').style.display = tab === 'module' ? 'flex' : 'none';
+  if (tab === 'module' && benefitCount === 0 && stepCount === 0) {
+    addBenefit(); addBenefit(); addBenefit(); addBenefit();
+    addStep(); addStep(); addStep();
+    addTip();
+  }
+}
+
+/* ══════════════════════
+   LOGOS
+══════════════════════ */
+function handleLogo(input, which) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const b64 = e.target.result;
+    if (which === 'company') {
+      state.companyLogo = b64;
+      const prev = document.getElementById('company-logo-preview');
+      prev.src = b64; prev.classList.add('show');
+      document.getElementById('company-logo-name').textContent = file.name;
+      document.getElementById('company-logo-name').classList.add('show');
+      document.querySelector('#company-upload-wrap .img-upload-label').style.display = 'none';
+    } else {
+      state.clientLogo = b64;
+      const prev = document.getElementById('client-logo-preview');
+      prev.src = b64; prev.classList.add('show');
+      document.getElementById('client-logo-name').textContent = file.name;
+      document.getElementById('client-logo-name').classList.add('show');
+      document.querySelector('#client-upload-wrap .img-upload-label').style.display = 'none';
+    }
+    updateProjectPreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+function syncColorFromHex() {
+  const hex = document.getElementById('proj-color-hex').value;
+  if (/^#[0-9a-fA-F]{6}$/.test(hex)) {
+    document.getElementById('proj-color').value = hex;
+    state.color = hex;
+  }
+}
+
+document.getElementById('proj-color').addEventListener('input', function() {
+  document.getElementById('proj-color-hex').value = this.value;
+  state.color = this.value;
+});
+
+/* ══════════════════════
+   PROJECT PREVIEW
+══════════════════════ */
+function updateProjectPreview() {
+  state.title = document.getElementById('proj-title').value;
+  state.h1 = document.getElementById('proj-h1').value;
+  state.desc = document.getElementById('proj-desc').value;
+
+  const bar = document.getElementById('proj-info-bar');
+  if (state.h1 || state.desc || state.companyLogo || state.clientLogo) {
+    bar.classList.add('show');
+  }
+
+  document.getElementById('proj-preview-h1').textContent = state.h1 || '—';
+  document.getElementById('proj-preview-desc').textContent = state.desc || '—';
+
+  if (state.companyLogo) {
+    document.getElementById('company-logo-bar').outerHTML = `<img id="company-logo-bar" class="proj-logo-img" src="${state.companyLogo}" alt="Company">`;
+  }
+  if (state.clientLogo) {
+    document.getElementById('client-logo-bar').outerHTML = `<img id="client-logo-bar" class="proj-logo-img" src="${state.clientLogo}" alt="Client">`;
+  }
+}
+
+/* ══════════════════════
+   DYNAMIC FORM FIELDS
+══════════════════════ */
+function addBenefit(val = { ico: '', t: '', d: '' }) {
+  const id = ++benefitCount;
+  const el = document.createElement('div');
+  el.className = 'repeat-group';
+  el.id = `benefit-${id}`;
+  el.innerHTML = `
+    <div class="repeat-group-title">
+      Fonctionnalité ${id}
+      <button class="btn-remove-group" onclick="removeEl('benefit-${id}')">✕</button>
+    </div>
+    <div class="inline-group" style="margin-bottom:8px">
+      <div class="form-group" style="margin:0">
+        <input type="text" class="form-input" placeholder="Emoji (ex. ✅)" value="${val.ico}" style="text-align:center">
+      </div>
+      <div class="form-group" style="margin:0">
+        <input type="text" class="form-input" placeholder="Titre du bénéfice" value="${val.t}">
+      </div>
+    </div>
+    <textarea class="form-textarea" placeholder="Décrivez ce bénéfice en langage clair…" style="min-height:56px">${val.d}</textarea>
+  `;
+  document.getElementById('benefits-list').appendChild(el);
+}
+
+function addStep(val = { t: '', d: '' }) {
+  const id = ++stepCount;
+  const num = document.querySelectorAll('.step-item').length + 1;
+  const el = document.createElement('div');
+  el.className = 'step-item';
+  el.id = `step-${id}`;
+  el.innerHTML = `
+    <div class="step-num">${num}</div>
+    <div class="step-fields">
+      <input type="text" class="form-input" placeholder="Titre de l'étape" value="${val.t}">
+      <input type="text" class="form-input" placeholder="Description de l'étape" value="${val.d}">
+    </div>
+    <button class="btn-remove-step" onclick="removeEl('step-${id}')">✕</button>
+  `;
+  document.getElementById('steps-list').appendChild(el);
+}
+
+function addTip(val = '') {
+  const id = ++tipCount;
+  const el = document.createElement('div');
+  el.className = 'tip-item-row';
+  el.id = `tip-${id}`;
+  el.innerHTML = `
+    <input type="text" class="form-input" placeholder="Conseil pratique pour le client…" value="${val}">
+    <button class="btn-remove-step" onclick="removeEl('tip-${id}')">✕</button>
+  `;
+  document.getElementById('tips-list').appendChild(el);
+}
+
+function removeEl(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+/* ══════════════════════
+   SAVE MODULE
+══════════════════════ */
+function saveModule() {
+  const name = document.getElementById('mod-name').value.trim();
+  const icon = document.getElementById('mod-icon').value.trim() || '📦';
+  const cat  = document.getElementById('mod-cat').value;
+  const desc = document.getElementById('mod-desc').value.trim();
+
+  if (!name || !desc) { toast('⚠️', 'Le nom et la description du module sont obligatoires.'); return; }
+
+  // collect benefits
+  const benefits = [];
+  document.querySelectorAll('#benefits-list .repeat-group').forEach(group => {
+    const inputs = group.querySelectorAll('input[type=text]');
+    const ta = group.querySelector('textarea');
+    const ico = inputs[0]?.value.trim() || '✅';
+    const t = inputs[1]?.value.trim();
+    const d = ta?.value.trim();
+    if (t || d) benefits.push({ ico, t: t || '—', d: d || '' });
+  });
+
+  // collect steps
+  const steps = [];
+  document.querySelectorAll('#steps-list .step-item').forEach((item, idx) => {
+    const inputs = item.querySelectorAll('input');
+    const t = inputs[0]?.value.trim();
+    const d = inputs[1]?.value.trim();
+    if (t || d) steps.push({ n: String(idx + 1), t: t || '—', d: d || '' });
+  });
+
+  // collect tips
+  const tips = [];
+  document.querySelectorAll('#tips-list .tip-item-row input').forEach(inp => {
+    const v = inp.value.trim();
+    if (v) tips.push(v);
+  });
+
+  const mod = {
+    id: state.editingId || `mod_${Date.now()}`,
+    icon, cat, name, desc, benefits, steps, tips,
+    cc: catColors[cat] || '#2d5a3d',
+  };
+
+  const isEditing = !!state.editingId;
+
+  if (state.editingId) {
+    const idx = state.modules.findIndex(m => m.id === state.editingId);
+    if (idx !== -1) state.modules[idx] = mod;
+    state.editingId = null;
+  } else {
+    state.modules.push(mod);
+  }
+
+  renderModulesPreview();
+  clearModuleForm();
+  updateGenerateBtn();
+  toast('✅', isEditing ? `"${name}" mis à jour !` : `"${name}" enregistré avec succès !`);
+  switchTab('project', document.querySelectorAll('.ptab')[0]);
+}
+
+/* ══════════════════════
+   CLEAR MODULE FORM
+══════════════════════ */
+function clearModuleForm() {
+  document.getElementById('mod-name').value = '';
+  document.getElementById('mod-icon').value = '';
+  document.getElementById('mod-desc').value = '';
+  document.getElementById('mod-cat').value = 'sales';
+  document.getElementById('benefits-list').innerHTML = '';
+  document.getElementById('steps-list').innerHTML = '';
+  document.getElementById('tips-list').innerHTML = '';
+  benefitCount = 0; stepCount = 0; tipCount = 0;
+  state.editingId = null;
+  document.getElementById('btn-save-module').textContent = '✓ Enregistrer le module';
+}
+
+/* ══════════════════════
+   RENDER PREVIEW
+══════════════════════ */
+function renderModulesPreview() {
+  const container = document.getElementById('modules-list-preview');
+  document.getElementById('empty-state')?.remove();
+
+  // clear existing cards
+  container.querySelectorAll('.mod-preview-card').forEach(c => c.remove());
+
+  if (!state.modules.length) {
+    container.innerHTML = `<div class="empty-state" id="empty-state">
+      <div class="empty-ico">🧩</div>
+      <div class="empty-title">Aucun module pour l'instant</div>
+      <div class="empty-sub">Allez dans l'onglet "Ajouter un module", renseignez les informations et cliquez sur Enregistrer.</div>
+    </div>`;
+    document.getElementById('proj-info-bar').classList.remove('show');
+    return;
+  }
+
+  document.getElementById('proj-info-bar').classList.add('show');
+
+  state.modules.forEach(mod => {
+    const card = document.createElement('div');
+    card.className = 'mod-preview-card';
+    card.id = `pcard-${mod.id}`;
+    card.innerHTML = `
+      <div class="mod-preview-header" onclick="toggleCard('${mod.id}')">
+        <div class="mod-preview-left">
+          <div class="mod-preview-icon">${mod.icon}</div>
+          <div>
+            <div class="mod-preview-name">${mod.name}</div>
+            <div class="mod-preview-cat">${catLabels[mod.cat] || mod.cat}</div>
+          </div>
+        </div>
+        <div class="mod-preview-right">
+          <span class="mod-pill ${mod.benefits.length ? 'has' : ''}">${mod.benefits.length} bénéfice(s)</span>
+          <span class="mod-pill ${mod.steps.length ? 'has' : ''}">${mod.steps.length} étape(s)</span>
+          <span class="mod-pill ${mod.tips.length ? 'has' : ''}">${mod.tips.length} conseil(s)</span>
+          <div class="mod-preview-actions">
+            <button class="btn-mod-action" onclick="event.stopPropagation();editModule('${mod.id}')">✏️ Modifier</button>
+            <button class="btn-mod-action del" onclick="event.stopPropagation();deleteModule('${mod.id}')">🗑 Supprimer</button>
+          </div>
+        </div>
+      </div>
+      <div class="mod-preview-body" id="pbody-${mod.id}">
+        <div class="mpb-section">
+          <div class="mpb-label">Description</div>
+          <div class="mpb-content">${mod.desc}</div>
+        </div>
+        ${mod.benefits.length ? `<div class="mpb-section">
+          <div class="mpb-label">Fonctionnalités</div>
+          <div class="mpb-chips">${mod.benefits.map(b=>`<span class="mpb-chip">${b.ico} ${b.t}</span>`).join('')}</div>
+        </div>` : ''}
+        ${mod.steps.length ? `<div class="mpb-section">
+          <div class="mpb-label">Étapes du processus</div>
+          <div class="mpb-content">${mod.steps.map(s=>`<strong>${s.n}.</strong> ${s.t}`).join(' → ')}</div>
+        </div>` : ''}
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function toggleCard(id) {
+  const body = document.getElementById(`pbody-${id}`);
+  if (body) body.classList.toggle('open');
+}
+
+function editModule(id) {
+  const mod = state.modules.find(m => m.id === id);
+  if (!mod) return;
+
+  clearModuleForm();           // resets editingId to null — must come first
+  state.editingId = id;        // set AFTER clear so it survives into saveModule
+
+  document.getElementById('mod-name').value = mod.name;
+  document.getElementById('mod-icon').value = mod.icon;
+  document.getElementById('mod-cat').value = mod.cat;
+  document.getElementById('mod-desc').value = mod.desc;
+
+  mod.benefits.forEach(b => addBenefit(b));
+  mod.steps.forEach(s => addStep(s));
+  mod.tips.forEach(t => addTip(t));
+
+  // Update button label to make it clear we're editing
+  document.getElementById('btn-save-module').textContent = '✓ Mettre à jour';
+
+  switchTab('module', document.querySelectorAll('.ptab')[1]);
+  document.getElementById('panel-footer-module').style.display = 'flex';
+}
+
+function deleteModule(id) {
+  state.modules = state.modules.filter(m => m.id !== id);
+  document.getElementById(`pcard-${id}`)?.remove();
+  if (!state.modules.length) renderModulesPreview();
+  updateGenerateBtn();
+  toast('🗑', 'Module supprimé.');
+}
+
+function clearAll() {
+  if (!state.modules.length) return;
+  if (!confirm('Supprimer tous les modules ?')) return;
+  state.modules = [];
+  renderModulesPreview();
+  updateGenerateBtn();
+}
+
+function resetToDefaults() {
+  if (!confirm('Réinitialiser avec les 12 modules Odoo par défaut ? Cela remplacera votre liste actuelle.')) return;
+  state.modules = DEFAULT_MODULES.map(m => ({...m}));
+  renderModulesPreview();
+  updateGenerateBtn();
+  toast('↺', '12 modules par défaut restaurés.');
+}
+
+function updateGenerateBtn() {
+  document.getElementById('mod-count-num').textContent = state.modules.length;
+  document.getElementById('btn-generate').disabled = !state.modules.length;
+}
+
+/* ══════════════════════
+   TOAST
+══════════════════════ */
+function toast(ico, msg, duration = 2800) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-ico').textContent = ico;
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+/* ══════════════════════
+   GENERATE MODAL
+══════════════════════ */
+function openGenerateModal() {
+  state.title = document.getElementById('proj-title').value.trim();
+  state.h1 = document.getElementById('proj-h1').value.trim();
+  state.desc = document.getElementById('proj-desc').value.trim();
+  state.color = document.getElementById('proj-color').value;
+
+  const summary = document.getElementById('gen-summary');
+  summary.innerHTML = `
+    <b>Titre de la page :</b> ${state.title || '(non renseigné)'}<br>
+    <b>Titre principal :</b> ${state.h1 || '(non renseigné)'}<br>
+    <b>Description :</b> ${state.desc ? state.desc.slice(0, 80) + (state.desc.length > 80 ? '…' : '') : '(non renseigné)'}<br>
+    <b>Logo société :</b> ${state.companyLogo ? '✅ Importé' : '—'}<br>
+    <b>Logo client :</b> ${state.clientLogo ? '✅ Importé' : '—'}<br>
+    <b>Modules :</b> ${state.modules.length} (${state.modules.map(m => m.name).join(', ')})
+  `;
+  document.getElementById('gen-modal').classList.add('open');
+}
+
+function closeGenerateModal() {
+  document.getElementById('gen-modal').classList.remove('open');
+  document.getElementById('gen-progress').style.width = '0%';
+}
+
+async function doGenerate() {
+  const btn = document.getElementById('btn-do-generate');
+  btn.disabled = true;
+  btn.textContent = '⏳ Génération…';
+
+  // animate progress
+  const prog = document.getElementById('gen-progress');
+  let p = 0;
+  const interval = setInterval(() => {
+    p = Math.min(p + Math.random() * 18, 92);
+    prog.style.width = p + '%';
+  }, 80);
+
+  await new Promise(r => setTimeout(r, 900));
+
+  clearInterval(interval);
+  prog.style.width = '100%';
+
+  const html = buildOutputHTML();
+  download(html, (state.title || 'odoo-presentation') .toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'') + '.html');
+
+  btn.disabled = false;
+  btn.textContent = '⬇ Télécharger HTML';
+  closeGenerateModal();
+  toast('🎉', 'Fichier HTML généré et téléchargé !', 3500);
+}
+
+/* ══════════════════════
+   BUILD OUTPUT HTML
+══════════════════════ */
+function buildOutputHTML() {
+  const color = state.color || '#2d5a3d';
+  const colorLight = color + '14';
+  const colorMid  = color + '28';
+  const colorText = color;
+
+  // module js data
+  const modsJS = JSON.stringify(state.modules);
+
+  // logos
+  const companyLogoHTML = state.companyLogo
+    ? `<img class="logo-img" src="${state.companyLogo}" alt="Logo société">`
+    : '';
+  const clientLogoHTML = state.clientLogo
+    ? `<img class="logo-img" src="${state.clientLogo}" alt="Logo client">`
+    : '';
+  const hasLogos = state.companyLogo || state.clientLogo;
+
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${esc(state.title || 'Odoo Presentation')}</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#faf8f5;--surface:#ffffff;--surface2:#f3f0eb;--border:#e8e2d9;
+  --text:#1a1814;--muted:#7a7268;--muted2:#a89e92;
+  --accent:${color};
+  --radius:14px;--radius-lg:22px;--radius-xl:32px;
+  --shadow:0 2px 20px rgba(0,0,0,.07);--shadow-lg:0 8px 48px rgba(0,0,0,.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 60% 40% at 10% 10%,${color}0a 0%,transparent 60%),
+    radial-gradient(ellipse 50% 50% at 90% 80%,${color}08 0%,transparent 60%)}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(250,248,245,.92);
+  backdrop-filter:blur(16px);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px}
+.nav-logo{display:flex;align-items:center;gap:14px}
+${hasLogos ? `.logo-img{height:36px;max-width:100px;object-fit:contain;border-radius:6px}
+.logo-sep{width:1px;height:28px;background:var(--border);margin:0 4px}` : ''}
+.nav-title{font-family:'Playfair Display',serif;font-weight:600;font-size:.95rem;color:var(--muted)}
+.hero{position:relative;z-index:1;padding:120px 48px 72px;max-width:1100px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:64px}
+.hero-left{}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;
+  background:${colorLight};border:1px solid ${colorMid};
+  color:var(--accent);border-radius:20px;padding:6px 14px;
+  font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:24px}
+.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:'Playfair Display',serif;font-weight:700;
+  font-size:clamp(2rem,4vw,3.2rem);line-height:1.12;letter-spacing:-.02em;margin-bottom:20px}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero-sub{font-size:1rem;color:var(--muted);line-height:1.8;font-weight:300;max-width:480px}
+.hero-visual{position:relative;display:flex;align-items:center;justify-content:center}
+.hero-stack{position:relative;width:100%;height:280px}
+.hcard{position:absolute;left:0;right:0;background:var(--surface);border-radius:22px;
+  padding:22px 24px;box-shadow:0 8px 40px rgba(0,0,0,.12);border:1px solid var(--border);transition:all .4s}
+.hcard:nth-child(1){top:0;z-index:3;transform:rotate(-1.5deg)}
+.hcard:nth-child(2){top:18px;left:14px;right:-14px;z-index:2;transform:rotate(1.8deg);opacity:.72}
+.hcard:nth-child(3){top:36px;left:-8px;right:8px;z-index:1;transform:rotate(-1deg);opacity:.42}
+.hcard-icon{font-size:1.6rem;margin-bottom:10px}
+.hcard-name{font-family:'Playfair Display',serif;font-weight:600;font-size:.95rem;margin-bottom:5px}
+.hcard-desc{font-size:.74rem;color:var(--muted);line-height:1.6;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hcard-tag{display:inline-block;margin-top:10px;font-size:.62rem;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:8px;
+  background:var(--surface2);color:var(--muted)}
+@media(max-width:768px){.hero{grid-template-columns:1fr;}.hero-visual{display:none}}
+.discovery-bar{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 48px 32px}
+.search-wrap{position:relative;max-width:420px;margin-bottom:18px}
+.search-wrap input{width:100%;background:var(--surface);border:1.5px solid var(--border);
+  border-radius:var(--radius);padding:12px 14px 12px 44px;color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:.86rem;outline:none;transition:all .2s;box-shadow:var(--shadow)}
+.search-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px ${colorLight}}
+.search-wrap input::placeholder{color:var(--muted2)}
+.search-ico{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--muted2)}
+.cat-strip{display:flex;gap:8px;flex-wrap:wrap}
+.cat-pill{padding:7px 16px;border-radius:20px;font-size:.74rem;font-weight:500;
+  border:1.5px solid var(--border);cursor:pointer;background:var(--surface);
+  color:var(--muted);transition:all .2s;box-shadow:var(--shadow);font-family:'DM Sans',sans-serif}
+.cat-pill:hover{border-color:var(--accent);color:var(--accent)}
+.cat-pill.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 12px ${color}40}
+.mod-grid{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 48px 80px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.mod-card{background:var(--surface);border:1.5px solid var(--border);
+  border-radius:var(--radius-lg);padding:28px;cursor:pointer;transition:all .3s;
+  box-shadow:var(--shadow);position:relative;overflow:hidden}
+.mod-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;
+  background:var(--cc,var(--accent));transform:scaleX(0);transform-origin:left;transition:transform .3s ease}
+.mod-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:var(--cc,var(--accent))}
+.mod-card:hover::after{transform:scaleX(1)}
+.mc-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.mc-icon{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;
+  justify-content:center;font-size:1.4rem;background:var(--cc,var(--accent))14;border:1px solid var(--cc,var(--accent))28}
+.mc-cat-tag{font-size:.62rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+  padding:4px 10px;border-radius:8px;background:var(--cc,var(--accent))14;
+  color:var(--cc,var(--accent));border:1px solid var(--cc,var(--accent))28}
+.mc-name{font-family:'Playfair Display',serif;font-weight:600;font-size:1.1rem;margin-bottom:8px}
+.mc-desc{font-size:.8rem;color:var(--muted);line-height:1.7;display:-webkit-box;
+  -webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.mc-footer{margin-top:18px;display:flex;align-items:center;justify-content:space-between}
+.mc-feats{display:flex;gap:6px;flex-wrap:wrap}
+.mc-feat{font-size:.62rem;padding:3px 8px;border-radius:6px;background:var(--surface2);color:var(--muted);font-weight:500}
+.mc-arrow{color:var(--cc,var(--accent));font-size:1rem;transition:transform .2s}
+.mod-card:hover .mc-arrow{transform:translateX(4px)}
+#overlay{position:fixed;inset:0;z-index:200;background:rgba(26,24,20,.5);backdrop-filter:blur(4px);
+  opacity:0;pointer-events:none;transition:opacity .3s}
+#overlay.open{opacity:1;pointer-events:all}
+#detail-panel{position:fixed;top:0;right:0;bottom:0;z-index:201;width:min(680px,100vw);
+  background:var(--bg);overflow-y:auto;transform:translateX(100%);
+  transition:transform .35s cubic-bezier(.4,0,.2,1);
+  border-left:1px solid var(--border);box-shadow:-20px 0 60px rgba(0,0,0,.12)}
+#detail-panel.open{transform:translateX(0)}
+.dp-inner{padding:48px 44px 60px}
+.dp-close{display:flex;align-items:center;gap:8px;margin-bottom:32px;
+  color:var(--muted);cursor:pointer;font-size:.82rem;font-weight:500;transition:color .2s;width:fit-content}
+.dp-close:hover{color:var(--text)}
+.dp-hero{display:flex;align-items:flex-start;gap:20px;margin-bottom:32px}
+.dp-icon{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;
+  justify-content:center;font-size:2rem;flex-shrink:0}
+.dp-name{font-family:'Playfair Display',serif;font-weight:700;font-size:1.8rem;margin-bottom:6px;line-height:1.1}
+.dp-cat{font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.dp-desc{font-size:.9rem;color:var(--muted);line-height:1.8;font-weight:300}
+.dp-section{margin-bottom:36px}
+.dp-section-title{font-family:'Playfair Display',serif;font-weight:600;font-size:1rem;
+  color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.dp-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.benefits-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.benefit-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.benefit-icon{font-size:1.2rem;margin-bottom:8px}
+.benefit-title{font-weight:600;font-size:.82rem;margin-bottom:4px}
+.benefit-desc{font-size:.76rem;color:var(--muted);line-height:1.6}
+.wf-timeline{display:flex;flex-direction:column;gap:0}
+.wf-step{display:flex;gap:16px;position:relative}
+.wf-step:not(:last-child) .wf-line{position:absolute;left:19px;top:38px;bottom:0;width:2px;background:linear-gradient(to bottom,${color}60,transparent)}
+.wf-num{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;background:${colorLight};border:2px solid ${colorMid};
+  font-family:'Playfair Display',serif;font-weight:700;font-size:.82rem;
+  color:var(--accent);position:relative;z-index:1}
+.wf-content{padding:6px 0 28px}
+.wf-step-title{font-weight:600;font-size:.88rem;margin-bottom:4px}
+.wf-step-desc{font-size:.78rem;color:var(--muted);line-height:1.7}
+.tips-list{display:flex;flex-direction:column;gap:12px}
+.tip-item{display:flex;align-items:flex-start;gap:12px;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.tip-ico{font-size:1rem;flex-shrink:0;margin-top:1px}
+.tip-text{font-size:.8rem;color:var(--muted);line-height:1.7}
+.dtabs{display:flex;gap:4px;margin-bottom:28px;border-bottom:1px solid var(--border);padding-bottom:0}
+.dtab{padding:10px 18px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;
+  font-size:.8rem;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s;margin-bottom:-1px}
+.dtab:hover{color:var(--text)}
+.dtab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.hidden{display:none!important}
+footer{position:relative;z-index:1;background:var(--surface);border-top:1px solid var(--border);
+  padding:28px 48px;display:flex;align-items:center;justify-content:space-between}
+.footer-brand{font-family:'Playfair Display',serif;font-weight:600;font-size:.9rem;color:var(--muted)}
+.footer-logos{display:flex;align-items:center;gap:12px}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-logo">
+    ${companyLogoHTML}
+    ${hasLogos ? '<div class="logo-sep"></div>' : ''}
+    ${clientLogoHTML}
+    ${state.title ? `<span class="nav-title">${esc(state.title)}</span>` : ''}
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-badge"><span class="hero-badge-dot"></span>Odoo 19</div>
+    <h1>${state.h1 ? formatH1(state.h1) : '<em>Odoo 19</em>'}</h1>
+    ${state.desc ? `<p class="hero-sub">${esc(state.desc)}</p>` : ''}
+  </div>
+  <div class="hero-visual">
+    <div class="hero-stack">
+      ${state.modules.slice(0,3).map((m,i) => `
+      <div class="hcard">
+        <div class="hcard-icon">${m.icon}</div>
+        <div class="hcard-name">${esc(m.name)}</div>
+        <div class="hcard-desc">${esc(m.desc)}</div>
+        <span class="hcard-tag">${esc(m.benefits[0]?.t || '')}</span>
+      </div>`).join('')}
+    </div>
+  </div>
+</section>
+
+<div class="discovery-bar">
+  <div class="search-wrap"><span class="search-ico">⌕</span><input type="text" id="srch" placeholder="Rechercher un module…" oninput="filterMods()"></div>
+  <div class="cat-strip" id="cat-strip"></div>
+</div>
+
+<div class="mod-grid" id="mod-grid"></div>
+
+<div id="overlay" onclick="closeDetail()"></div>
+<div id="detail-panel">
+  <div class="dp-inner">
+    <div class="dp-close" onclick="closeDetail()">← Retour aux modules</div>
+    <div class="dp-hero">
+      <div class="dp-icon" id="dp-icon"></div>
+      <div>
+        <div class="dp-cat" id="dp-cat"></div>
+        <div class="dp-name" id="dp-name"></div>
+        <div class="dp-desc" id="dp-desc"></div>
+      </div>
+    </div>
+    <div class="dtabs">
+      <div class="dtab active" onclick="showDTab('b',this)">Fonctionnalités</div>
+      <div class="dtab" onclick="showDTab('w',this)">Comment ça fonctionne</div>
+      <div class="dtab" onclick="showDTab('t',this)">Bons à savoir</div>
+    </div>
+    <div id="dp-b"></div>
+    <div id="dp-w" class="hidden"></div>
+    <div id="dp-t" class="hidden"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-brand">${esc(state.title || 'Odoo 19')}</div>
+  <div class="footer-logos">
+    ${companyLogoHTML}
+    ${clientLogoHTML}
+  </div>
+</footer>
+
+<script>
+const MODS=${modsJS};
+const catLabels={sales:'Ventes',finance:'Finance',logistics:'Logistique',hr:'Ressources Humaines',project:'Projets',web:'Web & E-commerce',mfg:'Fabrication',collab:'Collaboration'};
+let activeCat='all', curMod=null;
+
+function buildCats(){
+  const cats=['all',...new Set(MODS.map(m=>m.cat))];
+  const strip=document.getElementById('cat-strip');
+  cats.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='cat-pill'+(c==='all'?' active':'');
+    btn.textContent=c==='all'?'Tous':(catLabels[c]||c);
+    btn.onclick=()=>{activeCat=c;document.querySelectorAll('.cat-pill').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderGrid(filtered());};
+    strip.appendChild(btn);
+  });
+}
+
+function filtered(){
+  const q=document.getElementById('srch').value.toLowerCase();
+  return MODS.filter(m=>(activeCat==='all'||m.cat===activeCat)&&(!q||m.name.toLowerCase().includes(q)||m.desc.toLowerCase().includes(q)));
+}
+function filterMods(){renderGrid(filtered());}
+
+function renderGrid(mods){
+  const g=document.getElementById('mod-grid');g.innerHTML='';
+  mods.forEach(m=>{
+    const card=document.createElement('div');
+    card.className='mod-card';card.style.setProperty('--cc',m.cc);card.onclick=()=>openMod(m.id);
+    card.innerHTML=\`<div class="mc-header"><div class="mc-icon">\${m.icon}</div><span class="mc-cat-tag">\${catLabels[m.cat]||m.cat}</span></div>
+      <div class="mc-name">\${m.name}</div><div class="mc-desc">\${m.desc}</div>
+      <div class="mc-footer">
+        <div class="mc-feats">\${m.benefits.slice(0,3).map(b=>\`<span class="mc-feat">\${b.t}</span>\`).join('')}</div>
+        <span class="mc-arrow">→</span>
+      </div>\`;
+    g.appendChild(card);
+  });
+}
+
+function openMod(id){
+  curMod=MODS.find(m=>m.id===id);if(!curMod)return;
+  const cc=curMod.cc;
+  document.getElementById('dp-icon').textContent=curMod.icon;
+  document.getElementById('dp-icon').style.cssText=\`background:\${cc}14;border:1px solid \${cc}28\`;
+  document.getElementById('dp-cat').textContent=catLabels[curMod.cat]||curMod.cat;
+  document.getElementById('dp-cat').style.color=cc;
+  document.getElementById('dp-name').textContent=curMod.name;
+  document.getElementById('dp-desc').textContent=curMod.desc;
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.dtab')[0].classList.add('active');
+  renderDTab('b');renderDTab('w');renderDTab('t');
+  document.getElementById('dp-b').classList.remove('hidden');
+  document.getElementById('dp-w').classList.add('hidden');
+  document.getElementById('dp-t').classList.add('hidden');
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('detail-panel').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeDetail(){
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('detail-panel').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function showDTab(tab,btn){
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');
+  ['b','w','t'].forEach(k=>document.getElementById('dp-'+k).classList.add('hidden'));
+  document.getElementById('dp-'+tab).classList.remove('hidden');
+}
+
+function renderDTab(tab){
+  const m=curMod;const cc=m.cc;
+  if(tab==='b'){
+    document.getElementById('dp-b').innerHTML=\`<div class="dp-section">
+      <div class="dp-section-title">Ce que ce module vous apporte</div>
+      <div class="benefits-grid">\${m.benefits.map(b=>\`<div class="benefit-card">
+        <div class="benefit-icon">\${b.ico}</div>
+        <div class="benefit-title">\${b.t}</div>
+        <div class="benefit-desc">\${b.d}</div>
+      </div>\`).join('')}</div></div>\`;
+  } else if(tab==='w'){
+    document.getElementById('dp-w').innerHTML=\`<div class="dp-section">
+      <div class="dp-section-title">Comment ça fonctionne</div>
+      <div class="wf-timeline">\${m.steps.map(s=>\`<div class="wf-step">
+        <div class="wf-line"></div>
+        <div class="wf-num" style="border-color:\${cc}60;color:\${cc};background:\${cc}12">\${s.n}</div>
+        <div class="wf-content"><div class="wf-step-title">\${s.t}</div><div class="wf-step-desc">\${s.d}</div></div>
+      </div>\`).join('')}</div></div>\`;
+  } else {
+    document.getElementById('dp-t').innerHTML=\`<div class="dp-section">
+      <div class="dp-section-title">Bons à savoir</div>
+      <div class="tips-list">\${m.tips.map(tip=>\`<div class="tip-item">
+        <span class="tip-ico">💡</span><span class="tip-text">\${tip}</span>
+      </div>\`).join('')}</div></div>\`;
+  }
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDetail();});
+buildCats();renderGrid(MODS);
+<\/script>
+</body>
+</html>`;
+}
+
+function formatH1(text) {
+  const words = text.trim().split(' ');
+  if (words.length <= 2) return `<em>${esc(text)}</em>`;
+  const half = Math.ceil(words.length / 2);
+  return esc(words.slice(0, half).join(' ')) + '<br><em>' + esc(words.slice(half).join(' ')) + '</em>';
+}
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function download(content, filename) {
+  const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ══════════════════════
+   INIT
+══════════════════════ */
+// project tab visible by default
+document.getElementById('panel-footer-module').style.display = 'none';
+// render default modules on page load
+renderModulesPreview();
+updateGenerateBtn();
+</script>
+</body>
+</html>
