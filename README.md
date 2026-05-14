@@ -53,7 +53,7 @@
 
 ```bash
 # Simply open in your browser — no server needed
-open odoo19_learning.html
+open index.html
 # or double-click the file in your file manager
 ```
 
