@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Odoo 19 — Module Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0c10;--surface:#111318;--surface2:#181c24;--border:#232836;--accent:#7c5cfc;--accent2:#00d4ff;--accent3:#ff6b35;--gold:#f5c842;--green:#22c55e;--red:#ef4444;--text:#e8eaf0;--muted:#6b7280;--muted2:#9ca3af;--radius:12px;--radius-lg:20px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.4}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,12,16,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:60px;gap:12px}
+.nav-brand{display:flex;align-items:center;gap:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--text);flex-shrink:0}
+.nav-brand .grad{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-badge{background:linear-gradient(135deg,#7c5cfc22,#00d4ff11);border:1px solid var(--accent);color:var(--accent2);font-size:.62rem;padding:2px 8px;border-radius:20px;letter-spacing:.08em}
+.nav-center{display:flex;gap:4px;flex:1;justify-content:center}
+.nav-tab{padding:6px 16px;border-radius:8px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:600;font-size:.78rem;border:1px solid transparent;transition:all .2s;color:var(--muted);background:transparent}
+.nav-tab:hover{color:var(--text);background:var(--surface2)}
+.nav-tab.active{color:var(--accent2);border-color:var(--accent2);background:rgba(0,212,255,.08)}
+.lang-switch{display:flex;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:3px;flex-shrink:0}
+.lang-btn{padding:5px 12px;border-radius:7px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:.72rem;border:none;background:transparent;color:var(--muted);transition:all .2s;letter-spacing:.05em}
+.lang-btn:hover{color:var(--text)}
+.lang-btn.active{background:linear-gradient(135deg,var(--accent),#5b21b6);color:#fff;box-shadow:0 2px 8px rgba(124,92,252,.4)}
+.view{display:none;padding-top:80px;min-height:100vh}
+.view.active{display:block}
+.hero{padding:56px 40px 32px;max-width:1200px;margin:0 auto}
+.hero-eyebrow{font-size:.7rem;letter-spacing:.2em;color:var(--accent);text-transform:uppercase;margin-bottom:14px}
+.hero h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(1.8rem,4vw,3.2rem);line-height:1.1;margin-bottom:14px}
+.hero h1 em{font-style:normal;color:var(--accent2)}
+.hero-sub{color:var(--muted2);font-size:.85rem;max-width:500px;line-height:1.8;margin-bottom:32px}
+.hero-stats{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:32px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 22px;min-width:110px}
+.stat-card .num{font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-card .lbl{font-size:.68rem;color:var(--muted);margin-top:2px}
+.search-wrap{position:relative;max-width:440px}
+.search-wrap input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:11px 14px 11px 42px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.82rem;outline:none;transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--accent)}
+.search-wrap input::placeholder{color:var(--muted)}
+.search-ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.95rem}
+.cat-wrap{max-width:1200px;margin:0 auto;padding:0 40px 14px}
+.cat-filters{display:flex;gap:8px;flex-wrap:wrap}
+.cat-btn{padding:5px 13px;border-radius:20px;font-size:.7rem;font-family:'Syne',sans-serif;font-weight:600;border:1px solid var(--border);cursor:pointer;background:transparent;color:var(--muted);transition:all .2s}
+.cat-btn:hover{color:var(--text);border-color:var(--accent)}
+.cat-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.module-grid{max-width:1200px;margin:0 auto;padding:0 40px 40px;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.module-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.module-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 60%,var(--cc,#7c5cfc)18);opacity:0;transition:opacity .3s}
+.module-card:hover{border-color:var(--cc,var(--accent));transform:translateY(-2px);box-shadow:0 10px 36px rgba(0,0,0,.4)}
+.module-card:hover::before{opacity:1}
+.mod-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:11px;background:var(--cc,#7c5cfc)22;border:1px solid var(--cc,#7c5cfc)44}
+.mod-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;margin-bottom:5px}
+.mod-tech{font-size:.65rem;color:var(--muted);margin-bottom:7px}
+.mod-desc{font-size:.73rem;color:var(--muted2);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mod-badge{display:inline-block;margin-top:10px;font-size:.6rem;padding:3px 8px;border-radius:10px;background:var(--cc,#7c5cfc)22;color:var(--cc,#7c5cfc);border:1px solid var(--cc,#7c5cfc)44;font-family:'Syne',sans-serif;font-weight:600}
+#detail-view{max-width:1200px;margin:0 auto;padding:0 40px 60px}
+.detail-back{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:.78rem;cursor:pointer;margin-bottom:22px;transition:color .2s}
+.detail-back:hover{color:var(--text)}
+.detail-header{display:flex;align-items:flex-start;gap:18px;margin-bottom:28px}
+.detail-big-icon{width:60px;height:60px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0}
+.detail-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;margin-bottom:3px}
+.detail-tech{font-size:.72rem;color:var(--accent);font-family:'JetBrains Mono',monospace;margin-bottom:7px}
+.detail-desc{color:var(--muted2);font-size:.83rem;line-height:1.8}
+.detail-meta{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.meta-chip{font-size:.68rem;padding:4px 10px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--muted2)}
+.sec-tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:26px}
+.sec-tab{padding:10px 18px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:600;font-size:.78rem;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s}
+.sec-tab:hover{color:var(--text)}
+.sec-tab.active{color:var(--accent2);border-bottom-color:var(--accent2)}
+.models-list{display:flex;flex-direction:column;gap:11px}
+.model-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:15px 18px;cursor:pointer;transition:all .2s}
+.model-row:hover{border-color:var(--accent);background:var(--surface2)}
+.model-row-hd{display:flex;align-items:center;justify-content:space-between}
+.model-lbl{font-family:'Syne',sans-serif;font-size:.83rem;font-weight:700;margin-bottom:3px}
+.model-tech{font-family:'JetBrains Mono',monospace;font-size:.77rem;color:var(--accent)}
+.model-sdesc{font-size:.72rem;color:var(--muted2)}
+.chevron{color:var(--muted);transition:transform .2s;font-size:.85rem}
+.model-row.open .chevron{transform:rotate(90deg)}
+.fields-panel{margin-top:11px;display:none;background:var(--bg);border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+.model-row.open .fields-panel{display:block}
+.ftable{width:100%;border-collapse:collapse;font-size:.73rem}
+.ftable th{background:var(--surface2);color:var(--muted);text-align:left;padding:9px 13px;font-family:'Syne',sans-serif;font-weight:600;font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid var(--border)}
+.ftable td{padding:8px 13px;border-bottom:1px solid var(--border)66;vertical-align:top}
+.ftable tr:last-child td{border-bottom:none}
+.ftable tr:hover td{background:var(--surface2)}
+.ftype{display:inline-block;padding:2px 7px;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:.66rem;font-weight:500}
+.ftype.char    {background:#7c5cfc22;color:#a78bfa;border:1px solid #7c5cfc44}
+.ftype.int     {background:#00d4ff22;color:#67e8f9;border:1px solid #00d4ff44}
+.ftype.float   {background:#0ea5e922;color:#7dd3fc;border:1px solid #0ea5e944}
+.ftype.bool    {background:#22c55e22;color:#86efac;border:1px solid #22c55e44}
+.ftype.date    {background:#f5c84222;color:#fde047;border:1px solid #f5c84244}
+.ftype.many2one{background:#ff6b3522;color:#fb923c;border:1px solid #ff6b3544}
+.ftype.one2many{background:#ec489922;color:#f9a8d4;border:1px solid #ec489944}
+.ftype.many2many{background:#8b5cf622;color:#c4b5fd;border:1px solid #8b5cf644}
+.ftype.select  {background:#14b8a622;color:#5eead4;border:1px solid #14b8a644}
+.ftype.text    {background:#64748b22;color:#94a3b8;border:1px solid #64748b44}
+.ftype.binary  {background:#78350f22;color:#fbbf24;border:1px solid #78350f44}
+.freq{font-size:.6rem;padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.freq.req{background:#ef444422;color:#fca5a5;border-color:#ef444444}
+.wf-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:26px}
+.wf-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:22px}
+.wf-states{display:flex;align-items:center;flex-wrap:wrap;gap:0;margin-bottom:24px}
+.wf-state{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 14px;font-family:'Syne',sans-serif;font-weight:700;font-size:.75rem;white-space:nowrap}
+.wf-state.start{border-color:var(--green);color:var(--green);background:#22c55e11}
+.wf-state.end{border-color:var(--accent3);color:var(--accent3);background:#ff6b3511}
+.wf-state.cancel{border-color:var(--red);color:var(--red);background:#ef444411}
+.wf-arrow{color:var(--muted);padding:0 7px;flex-shrink:0}
+.wf-steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:11px}
+.wf-step{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:13px}
+.wf-step-n{font-size:.63rem;color:var(--accent);font-family:'JetBrains Mono',monospace;margin-bottom:4px}
+.wf-step-t{font-family:'Syne',sans-serif;font-weight:700;font-size:.78rem;margin-bottom:4px}
+.wf-step-d{font-size:.7rem;color:var(--muted2);line-height:1.6}
+.tip-box{background:rgba(124,92,252,.08);border:1px solid rgba(124,92,252,.3);border-radius:var(--radius);padding:14px 18px;font-size:.76rem;color:var(--muted2);line-height:1.7}
+.tip-box strong{color:var(--accent2)}
+#quiz-view{max-width:740px;margin:0 auto;padding:0 24px 60px}
+.quiz-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.quiz-prog-bar{flex:1;height:4px;background:var(--border);border-radius:2px;margin:0 18px;overflow:hidden}
+.quiz-prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s ease}
+.quiz-ctr{font-size:.73rem;color:var(--muted);white-space:nowrap}
+.quiz-score-d{font-family:'Syne',sans-serif;font-weight:800;font-size:.88rem;color:var(--gold)}
+.quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:30px;animation:slideIn .3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-cat{font-size:.65rem;color:var(--accent);letter-spacing:.15em;text-transform:uppercase;margin-bottom:14px;font-family:'Syne',sans-serif;font-weight:600}
+.q-text{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;line-height:1.5;margin-bottom:24px}
+.q-opts{display:flex;flex-direction:column;gap:9px}
+.q-opt{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:13px 16px;cursor:pointer;font-size:.8rem;line-height:1.5;transition:all .2s;display:flex;align-items:flex-start;gap:11px}
+.q-opt:hover:not(.disabled){border-color:var(--accent);background:rgba(124,92,252,.08)}
+.q-opt.correct{border-color:var(--green);background:rgba(34,197,94,.1);color:var(--green)}
+.q-opt.wrong{border-color:var(--red);background:rgba(239,68,68,.1);color:var(--red)}
+.q-opt.disabled{cursor:default}
+.opt-ltr{width:23px;height:23px;border-radius:6px;flex-shrink:0;background:var(--border);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.68rem}
+.q-opt.correct .opt-ltr{background:var(--green);color:#000}
+.q-opt.wrong .opt-ltr{background:var(--red);color:#fff}
+.q-expl{margin-top:18px;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);font-size:.76rem;color:var(--muted2);line-height:1.7;display:none}
+.q-expl.show{display:block;animation:fadeIn .3s ease}
+.q-expl strong{color:var(--accent2)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.q-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+.btn{padding:9px 22px;border-radius:var(--radius);font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;cursor:pointer;border:none;transition:all .2s}
+.btn-p{background:linear-gradient(135deg,var(--accent),#5b21b6);color:#fff}
+.btn-p:hover{opacity:.85;transform:translateY(-1px)}
+.btn-o{background:transparent;border:1px solid var(--border);color:var(--muted2)}
+.btn-o:hover{border-color:var(--accent);color:var(--text)}
+.quiz-setup-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:30px;margin-bottom:24px}
+.quiz-setup-box h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;margin-bottom:7px}
+.quiz-setup-box p{color:var(--muted2);font-size:.78rem;margin-bottom:22px}
+.qs-label{font-size:.73rem;color:var(--muted);display:block;margin-bottom:6px}
+.qs-select{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:var(--radius);font-family:'JetBrains Mono',monospace;font-size:.8rem;width:100%;outline:none;margin-bottom:14px}
+.qs-counts{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.cnt-btn{padding:5px 14px;border-radius:8px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:.76rem;border:1px solid var(--border);background:var(--surface2);color:var(--muted);transition:all .2s}
+.cnt-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.quiz-results-box{text-align:center;padding:38px 22px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+.r-emoji{font-size:3.6rem;margin-bottom:14px}
+.r-score{font-family:'Syne',sans-serif;font-weight:800;font-size:2.8rem;margin-bottom:7px;background:linear-gradient(135deg,var(--gold),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.r-label{color:var(--muted2);font-size:.83rem;margin-bottom:22px}
+.r-bar-wrap{background:var(--border);border-radius:4px;height:7px;max-width:280px;margin:0 auto 28px;overflow:hidden}
+.r-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 1s ease}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+.hidden{display:none!important}
+.cat-sales{--cc:#00d4ff}.cat-finance{--cc:#22c55e}.cat-inventory{--cc:#ff6b35}.cat-hr{--cc:#f5c842}.cat-project{--cc:#7c5cfc}.cat-website{--cc:#ec4899}.cat-manufacture{--cc:#14b8a6}.cat-technical{--cc:#8b5cf6}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect width="22" height="22" rx="6" fill="url(#ng)"/><defs><linearGradient id="ng" x1="0" y1="0" x2="22" y2="22"><stop stop-color="#7c5cfc"/><stop offset="1" stop-color="#00d4ff"/></linearGradient></defs><text x="11" y="15.5" font-size="11" text-anchor="middle" fill="white" font-weight="900" font-family="sans-serif">O</text></svg>
+    <span class="grad">Odoo 19</span>
+    <span id="nav-explorer-lbl" style="color:var(--text)">Explorer</span>
+    <div class="nav-badge">v19.0</div>
+  </div>
+  <div class="nav-center">
+    <button class="nav-tab active" id="ntab-learn" onclick="showView('learn')">📚 <span id="nl-txt">Learn</span></button>
+    <button class="nav-tab" id="ntab-quiz" onclick="showView('quiz')">🧠 <span id="nq-txt">Quiz</span></button>
+  </div>
+  <div class="lang-switch">
+    <button class="lang-btn active" id="lb-en" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" id="lb-fr" onclick="setLang('fr')">FR</button>
+  </div>
+</nav>
+
+<!-- LEARN VIEW -->
+<div class="view active" id="learn-view">
+  <div id="list-screen">
+    <div class="hero">
+      <div class="hero-eyebrow" id="h-eyebrow"></div>
+      <h1 id="h-h1"><em id="h-em"></em></h1>
+      <p class="hero-sub" id="h-sub"></p>
+      <div class="hero-stats">
+        <div class="stat-card"><div class="num">18</div><div class="lbl" id="st-mod"></div></div>
+        <div class="stat-card"><div class="num">80+</div><div class="lbl" id="st-mdl"></div></div>
+        <div class="stat-card"><div class="num">500+</div><div class="lbl" id="st-fld"></div></div>
+        <div class="stat-card"><div class="num">50+</div><div class="lbl" id="st-q"></div></div>
+      </div>
+      <div class="search-wrap"><span class="search-ico">⌕</span><input type="text" id="srch" oninput="filterMods()" id="srch-inp"></div>
+    </div>
+    <div class="cat-wrap"><div class="cat-filters" id="cat-filters"></div></div>
+    <div class="module-grid" id="mod-grid"></div>
+  </div>
+
+  <div id="detail-screen" class="hidden">
+    <div id="detail-view">
+      <div class="detail-back" onclick="backToList()">← <span id="back-lbl"></span></div>
+      <div class="detail-header">
+        <div class="detail-big-icon" id="d-icon"></div>
+        <div>
+          <div class="detail-title" id="d-title"></div>
+          <div class="detail-tech" id="d-tech"></div>
+          <div class="detail-desc" id="d-desc"></div>
+          <div class="detail-meta" id="d-meta"></div>
+        </div>
+      </div>
+      <div class="sec-tabs">
+        <div class="sec-tab active" id="stab-models" onclick="showSec('models',this)">🧩 <span id="tab-m-txt"></span></div>
+        <div class="sec-tab" id="stab-wf" onclick="showSec('workflow',this)">🔄 <span id="tab-w-txt"></span></div>
+        <div class="sec-tab" id="stab-tips" onclick="showSec('tips',this)">💡 <span id="tab-t-txt"></span></div>
+      </div>
+      <div id="sec-models" class="models-list"></div>
+      <div id="sec-workflow" class="hidden wf-wrap"></div>
+      <div id="sec-tips" class="hidden"></div>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ VIEW -->
+<div class="view" id="quiz-view-wrap">
+  <div id="quiz-view">
+    <div id="quiz-setup">
+      <div class="quiz-setup-box">
+        <h2 id="qz-title">🧠 Certification Quiz</h2>
+        <p id="qz-sub"></p>
+        <label class="qs-label" id="qz-lbl-mod"></label>
+        <select id="qz-mod-sel" class="qs-select"></select>
+        <label class="qs-label" id="qz-lbl-cnt"></label>
+        <div class="qs-counts">
+          <button class="cnt-btn active" onclick="setCnt(5,this)">5</button>
+          <button class="cnt-btn" onclick="setCnt(10,this)">10</button>
+          <button class="cnt-btn" onclick="setCnt(20,this)">20</button>
+          <button class="cnt-btn" onclick="setCnt(999,this)" id="cnt-all-btn"></button>
+        </div>
+        <button class="btn btn-p" id="btn-start" onclick="startQuiz()"></button>
+      </div>
+    </div>
+    <div id="quiz-active" class="hidden">
+      <div class="quiz-hd">
+        <div class="quiz-score-d" id="qz-score">⭐ 0</div>
+        <div class="quiz-prog-bar"><div class="quiz-prog-fill" id="qz-prog"></div></div>
+        <div class="quiz-ctr" id="qz-ctr">1 / 10</div>
+      </div>
+      <div class="quiz-card" id="qz-card">
+        <div class="q-cat" id="q-cat"></div>
+        <div class="q-text" id="q-text"></div>
+        <div class="q-opts" id="q-opts"></div>
+        <div class="q-expl" id="q-expl"></div>
+        <div class="q-actions">
+          <button class="btn btn-o" id="btn-skip" onclick="skipQ()"></button>
+          <button class="btn btn-p hidden" id="btn-next" onclick="nextQ()"></button>
+        </div>
+      </div>
+    </div>
+    <div id="quiz-results" class="hidden quiz-results-box">
+      <div class="r-emoji" id="r-emoji"></div>
+      <div class="r-score" id="r-score"></div>
+      <div class="r-label" id="r-label"></div>
+      <div class="r-bar-wrap"><div class="r-bar-fill" id="r-bar"></div></div>
+      <button class="btn btn-p" id="btn-retry" onclick="resetQuiz()"></button>
+      <button class="btn btn-o" id="btn-bklearn" style="margin-left:8px" onclick="showView('learn')"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─────────────────────────────────────────
+   TRANSLATIONS
+───────────────────────────────────────── */
+const T={
+  en:{
+    explorer:'Explorer', navLearn:'Learn', navQuiz:'Quiz',
+    eyebrow:'// Odoo 19 · Certification Prep · Developer Reference',
+    h1pre:'Master the ', h1em:'Core Modules',
+    sub:'Explore every standard Odoo 19 module — models, fields, and workflows. Built for developers preparing for Odoo certification.',
+    stMod:'Core Modules', stMdl:'Data Models', stFld:'Key Fields', stQ:'Quiz Questions',
+    searchPh:'Search modules...',
+    cats:['All','Sales & CRM','Finance','Inventory','HR','Project','Website','Manufacturing','Technical'],
+    backLbl:'Back to modules',
+    tabM:'Models', tabW:'Workflow', tabT:'Cert Tips',
+    fName:'Field Name', fType:'Type', fReq:'Required', fDesc:'Description',
+    req:'required', opt:'optional', step:'STEP',
+    qzTitle:'Certification Quiz',
+    qzSub:'Test your Odoo 19 knowledge across modules, models, fields and workflows.',
+    qzLblMod:'Select module focus', qzLblCnt:'Number of questions',
+    qzAll:'All modules (mixed)', cntAll:'All',
+    btnStart:'Start Quiz →', btnSkip:'Skip', btnNext:'Next →',
+    btnRetry:'Try Again', btnBack:'Back to Learn',
+    tipsFor:'Certification Tips for',
+    res:{90:"Outstanding! You're ready for certification!",75:"Great job! Almost exam-ready!",60:"Good progress — focus on weak modules.",0:"Keep studying — review the modules!"}
+  },
+  fr:{
+    explorer:'Explorateur', navLearn:'Apprendre', navQuiz:'Quiz',
+    eyebrow:'// Odoo 19 · Préparation Certification · Référence Développeur',
+    h1pre:'Maîtriser les ', h1em:'Modules Principaux',
+    sub:'Explorez chaque module standard Odoo 19 — modèles, champs et flux de travail. Conçu pour les développeurs préparant la certification Odoo.',
+    stMod:'Modules Principaux', stMdl:'Modèles de Données', stFld:'Champs Clés', stQ:'Questions Quiz',
+    searchPh:'Rechercher des modules...',
+    cats:['Tous','Ventes & CRM','Finance','Inventaire','RH','Projet','Site Web','Fabrication','Technique'],
+    backLbl:'Retour aux modules',
+    tabM:'Modèles', tabW:'Flux', tabT:'Conseils Certif.',
+    fName:'Nom du champ', fType:'Type', fReq:'Obligatoire', fDesc:'Description',
+    req:'obligatoire', opt:'optionnel', step:'ÉTAPE',
+    qzTitle:'Quiz de Certification',
+    qzSub:'Testez vos connaissances Odoo 19 sur les modules, modèles, champs et flux de travail.',
+    qzLblMod:'Sélectionner le module', qzLblCnt:'Nombre de questions',
+    qzAll:'Tous les modules (mixte)', cntAll:'Tous',
+    btnStart:'Démarrer le Quiz →', btnSkip:'Passer', btnNext:'Suivant →',
+    btnRetry:'Réessayer', btnBack:"Retour à l'apprentissage",
+    tipsFor:'Conseils de Certification pour',
+    res:{90:"Exceptionnel ! Vous êtes prêt pour la certification !",75:"Très bien ! Presque prêt pour l'examen !",60:"Bonne progression — concentrez-vous sur les modules faibles.",0:"Continuez à étudier — révisez les modules !"}
+  }
+};
+
+/* ─────────────────────────────────────────
+   MODULES DATA (bilingual)
+───────────────────────────────────────── */
+const MODS=[
+  {id:'sale',icon:'🛒',cat:'sales',
+   en:{name:'Sales',tn:'sale',desc:'Manages the complete sales cycle: quotations, sales orders, customer invoices, and product pricing. Integrates with CRM, Inventory, and Accounting.',
+    models:[
+     {name:'Sale Order',tech:'sale.order',desc:'Represents a quotation or confirmed sales order.',
+      fields:[{n:'name',t:'char',r:1,d:'Order reference (e.g. S00001)'},{n:'partner_id',t:'many2one',r:1,d:'Customer (res.partner)'},{n:'state',t:'select',r:1,d:'draft | sent | sale | done | cancel'},{n:'date_order',t:'date',r:0,d:'Confirmation date'},{n:'order_line',t:'one2many',r:0,d:'Ordered product lines'},{n:'amount_total',t:'float',r:0,d:'Total with taxes'},{n:'amount_untaxed',t:'float',r:0,d:'Subtotal before taxes'},{n:'user_id',t:'many2one',r:0,d:'Salesperson (res.users)'},{n:'team_id',t:'many2one',r:0,d:'Sales team'},{n:'pricelist_id',t:'many2one',r:0,d:'Pricelist applied'},{n:'validity_date',t:'date',r:0,d:'Quote expiry date'},{n:'invoice_ids',t:'many2many',r:0,d:'Related invoices'}]},
+     {name:'Sale Order Line',tech:'sale.order.line',desc:'A single product line within a sales order.',
+      fields:[{n:'order_id',t:'many2one',r:1,d:'Parent sale order'},{n:'product_id',t:'many2one',r:1,d:'Product being sold'},{n:'product_uom_qty',t:'float',r:1,d:'Quantity ordered'},{n:'price_unit',t:'float',r:1,d:'Unit price'},{n:'discount',t:'float',r:0,d:'Discount %'},{n:'price_subtotal',t:'float',r:0,d:'Subtotal (qty × price − discount)'},{n:'tax_id',t:'many2many',r:0,d:'Taxes applied'},{n:'qty_delivered',t:'float',r:0,d:'Quantity delivered'},{n:'qty_invoiced',t:'float',r:0,d:'Quantity invoiced'}]},
+     {name:'Product Template',tech:'product.template',desc:'Defines a product with its general attributes.',
+      fields:[{n:'name',t:'char',r:1,d:'Product name'},{n:'type',t:'select',r:1,d:'consu | service | storable'},{n:'list_price',t:'float',r:0,d:'Sales price'},{n:'standard_price',t:'float',r:0,d:'Cost price'},{n:'uom_id',t:'many2one',r:1,d:'Unit of measure'},{n:'categ_id',t:'many2one',r:1,d:'Internal category'},{n:'taxes_id',t:'many2many',r:0,d:'Customer taxes'},{n:'active',t:'bool',r:0,d:'Active/archived flag'}]}
+    ],
+    wf:{title:'Sales Order Lifecycle',states:['Draft (Quotation)','→','Sent','→','Sales Order','→','Done','/ Cancel'],st:['start','','','','end','','end','cancel'],
+     steps:[{n:'01',t:'Create Quotation',d:'Sales rep creates draft quotation with customer and product lines.'},{n:'02',t:'Send to Customer',d:'Quotation emailed; state → "sent".'},{n:'03',t:'Confirm Order',d:'Customer accepts. State → "sale". Stock moves created.'},{n:'04',t:'Deliver',d:'Delivery order generated in Inventory for storable products.'},{n:'05',t:'Invoice',d:'Invoice created based on invoicing policy (ordered/delivered).'},{n:'06',t:'Lock / Done',d:'After full delivery and invoicing, order locked as "done".'}]},
+    tips:['⚡ Know the difference: invoicing policy "ordered qty" vs "delivered qty".','⚡ qty_delivered is computed differently for storable vs service products.','⚡ Pricelists can be currency-based or discount-based.','⚡ confirm() on sale.order triggers procurement rules in Inventory.']},
+   fr:{name:'Ventes',tn:'sale',desc:'Gère le cycle de vente complet : devis, commandes, factures et tarification. S\'intègre avec le CRM, le Stock et la Comptabilité.',
+    models:[
+     {name:'Commande client',tech:'sale.order',desc:'Représente un devis ou une commande client confirmée.',
+      fields:[{n:'name',t:'char',r:1,d:'Référence de commande (ex. S00001)'},{n:'partner_id',t:'many2one',r:1,d:'Client (res.partner)'},{n:'state',t:'select',r:1,d:'draft | sent | sale | done | cancel'},{n:'date_order',t:'date',r:0,d:'Date de confirmation'},{n:'order_line',t:'one2many',r:0,d:'Lignes de produits commandés'},{n:'amount_total',t:'float',r:0,d:'Total avec taxes'},{n:'amount_untaxed',t:'float',r:0,d:'Sous-total hors taxes'},{n:'user_id',t:'many2one',r:0,d:'Commercial (res.users)'},{n:'team_id',t:'many2one',r:0,d:'Équipe commerciale'},{n:'pricelist_id',t:'many2one',r:0,d:'Liste de prix appliquée'},{n:'validity_date',t:'date',r:0,d:'Date d\'expiration du devis'},{n:'invoice_ids',t:'many2many',r:0,d:'Factures liées'}]},
+     {name:'Ligne de commande client',tech:'sale.order.line',desc:'Une ligne de produit dans une commande client.',
+      fields:[{n:'order_id',t:'many2one',r:1,d:'Commande parente'},{n:'product_id',t:'many2one',r:1,d:'Produit vendu'},{n:'product_uom_qty',t:'float',r:1,d:'Quantité commandée'},{n:'price_unit',t:'float',r:1,d:'Prix unitaire'},{n:'discount',t:'float',r:0,d:'Remise %'},{n:'price_subtotal',t:'float',r:0,d:'Sous-total (qté × prix − remise)'},{n:'tax_id',t:'many2many',r:0,d:'Taxes appliquées'},{n:'qty_delivered',t:'float',r:0,d:'Quantité livrée'},{n:'qty_invoiced',t:'float',r:0,d:'Quantité facturée'}]},
+     {name:'Modèle de produit',tech:'product.template',desc:'Définit un produit avec ses attributs généraux.',
+      fields:[{n:'name',t:'char',r:1,d:'Nom du produit'},{n:'type',t:'select',r:1,d:'consu | service | storable'},{n:'list_price',t:'float',r:0,d:'Prix de vente'},{n:'standard_price',t:'float',r:0,d:'Prix de revient'},{n:'uom_id',t:'many2one',r:1,d:'Unité de mesure'},{n:'categ_id',t:'many2one',r:1,d:'Catégorie interne'},{n:'taxes_id',t:'many2many',r:0,d:'Taxes client'},{n:'active',t:'bool',r:0,d:'Actif ou archivé'}]}
+    ],
+    wf:{title:'Cycle de vie d\'une commande client',states:['Brouillon (Devis)','→','Envoyé','→','Commande','→','Terminé','/ Annulé'],st:['start','','','','end','','end','cancel'],
+     steps:[{n:'01',t:'Créer le devis',d:'Le commercial crée un devis avec client et lignes produits.'},{n:'02',t:'Envoyer au client',d:'Devis envoyé par email ; état → "sent".'},{n:'03',t:'Confirmer la commande',d:'Client accepte. État → "sale". Mouvements de stock créés.'},{n:'04',t:'Livrer',d:'Bon de livraison généré dans le Stock pour produits stockables.'},{n:'05',t:'Facturer',d:'Facture créée selon politique de facturation (commandé/livré).'},{n:'06',t:'Verrouiller / Terminé',d:'Après livraison et facturation, commande verrouillée.'}]},
+    tips:['⚡ Politique de facturation : "quantité commandée" vs "quantité livrée" — distinction clé.','⚡ qty_delivered est calculé différemment pour produits stockables vs services.','⚡ Les listes de prix peuvent être basées sur devise ou remise.','⚡ confirm() sur sale.order déclenche les règles d\'approvisionnement dans le Stock.']}
+  },
+
+  {id:'crm',icon:'🎯',cat:'sales',
+   en:{name:'CRM',tn:'crm',desc:'Customer Relationship Management — leads, opportunities, sales pipeline with Kanban, predictive scoring, and activity planning.',
+    models:[
+     {name:'CRM Lead / Opportunity',tech:'crm.lead',desc:'Unified model for both leads and opportunities. type field distinguishes them.',
+      fields:[{n:'name',t:'char',r:1,d:'Opportunity title'},{n:'partner_id',t:'many2one',r:0,d:'Related customer'},{n:'stage_id',t:'many2one',r:1,d:'Pipeline stage (crm.stage)'},{n:'user_id',t:'many2one',r:0,d:'Assigned salesperson'},{n:'team_id',t:'many2one',r:0,d:'Sales team'},{n:'expected_revenue',t:'float',r:0,d:'Expected revenue'},{n:'probability',t:'float',r:0,d:'Win probability 0–100'},{n:'date_deadline',t:'date',r:0,d:'Expected closing date'},{n:'type',t:'select',r:1,d:'lead | opportunity'},{n:'active',t:'bool',r:0,d:'False when lost/archived'},{n:'priority',t:'select',r:0,d:'0 (normal) 1 (low) 2 (high) 3 (very high)'}]},
+     {name:'CRM Stage',tech:'crm.stage',desc:'Defines stages in the sales pipeline.',
+      fields:[{n:'name',t:'char',r:1,d:'Stage label (e.g. Qualified)'},{n:'sequence',t:'int',r:0,d:'Order in the pipeline'},{n:'probability',t:'float',r:0,d:'Default probability'},{n:'is_won',t:'bool',r:0,d:'Marks as winning stage'},{n:'team_id',t:'many2one',r:0,d:'Team-specific (null=global)'}]},
+     {name:'CRM Team',tech:'crm.team',desc:'A sales team grouping salespeople.',
+      fields:[{n:'name',t:'char',r:1,d:'Team name'},{n:'user_id',t:'many2one',r:0,d:'Team leader'},{n:'member_ids',t:'many2many',r:0,d:'Team members'},{n:'alias_id',t:'many2one',r:0,d:'Email alias for inbound leads'}]}
+    ],
+    wf:{title:'CRM Pipeline Flow',states:['New Lead','→','Qualified','→','Proposition','→','Won','/ Lost'],st:['start','','','','end','','end','cancel'],
+     steps:[{n:'01',t:'Lead Creation',d:'Lead created from website form, email, or manually.'},{n:'02',t:'Qualification',d:'Salesperson converts lead to opportunity after contact.'},{n:'03',t:'Pipeline',d:'Opportunity moves across kanban stages via drag-and-drop.'},{n:'04',t:'Proposal / Quotation',d:'Quotation created directly from opportunity.'},{n:'05',t:'Win / Lose',d:'Mark Won (is_won=True) or Lost with reason.'}]},
+    tips:['⚡ crm.lead uses type="lead" vs type="opportunity" — same model.','⚡ Predictive scoring uses historical win/loss data to auto-update probability.','⚡ lost_reason_id is set when marking an opportunity as lost.','⚡ Merge duplicates uses wizard crm.merge.opportunity.']},
+   fr:{name:'CRM',tn:'crm',desc:'Gestion de la relation client — pistes, opportunités, pipeline commercial avec Kanban, scoring prédictif et planification d\'activités.',
+    models:[
+     {name:'Piste / Opportunité CRM',tech:'crm.lead',desc:'Modèle unifié pour pistes et opportunités. Le champ type les distingue.',
+      fields:[{n:'name',t:'char',r:1,d:'Titre de l\'opportunité'},{n:'partner_id',t:'many2one',r:0,d:'Client lié'},{n:'stage_id',t:'many2one',r:1,d:'Étape du pipeline (crm.stage)'},{n:'user_id',t:'many2one',r:0,d:'Commercial assigné'},{n:'team_id',t:'many2one',r:0,d:'Équipe commerciale'},{n:'expected_revenue',t:'float',r:0,d:'Chiffre d\'affaires attendu'},{n:'probability',t:'float',r:0,d:'Probabilité de gain 0–100'},{n:'date_deadline',t:'date',r:0,d:'Date de clôture prévue'},{n:'type',t:'select',r:1,d:'lead | opportunity'},{n:'active',t:'bool',r:0,d:'False si perdue/archivée'},{n:'priority',t:'select',r:0,d:'0 (normal) 1 (bas) 2 (élevé) 3 (très élevé)'}]},
+     {name:'Étape CRM',tech:'crm.stage',desc:'Définit les étapes dans le pipeline de vente.',
+      fields:[{n:'name',t:'char',r:1,d:'Libellé de l\'étape (ex. Qualifié)'},{n:'sequence',t:'int',r:0,d:'Ordre dans le pipeline'},{n:'probability',t:'float',r:0,d:'Probabilité par défaut'},{n:'is_won',t:'bool',r:0,d:'Marque comme étape gagnante'},{n:'team_id',t:'many2one',r:0,d:'Étape spécifique équipe (null=globale)'}]},
+     {name:'Équipe commerciale',tech:'crm.team',desc:'Représente une équipe commerciale.',
+      fields:[{n:'name',t:'char',r:1,d:'Nom de l\'équipe'},{n:'user_id',t:'many2one',r:0,d:'Chef d\'équipe'},{n:'member_ids',t:'many2many',r:0,d:'Membres de l\'équipe'},{n:'alias_id',t:'many2one',r:0,d:'Alias email pour pistes entrantes'}]}
+    ],
+    wf:{title:'Flux du Pipeline CRM',states:['Nouvelle Piste','→','Qualifiée','→','Proposition','→','Gagnée','/ Perdue'],st:['start','','','','end','','end','cancel'],
+     steps:[{n:'01',t:'Création de la piste',d:'Piste créée via formulaire web, email ou manuellement.'},{n:'02',t:'Qualification',d:'Le commercial convertit la piste en opportunité après contact.'},{n:'03',t:'Pipeline',d:'L\'opportunité avance dans les colonnes kanban par glisser-déposer.'},{n:'04',t:'Proposition / Devis',d:'Devis créé directement depuis l\'opportunité.'},{n:'05',t:'Gagner / Perdre',d:'Marquer Gagnée (is_won=True) ou Perdue avec raison.'}]},
+    tips:['⚡ crm.lead utilise type="lead" vs type="opportunity" — même modèle partagé.','⚡ Le scoring prédictif utilise l\'historique des gains/pertes pour mettre à jour la probabilité.','⚡ lost_reason_id est renseigné lors du marquage d\'une opportunité comme perdue.','⚡ La fusion de doublons utilise l\'assistant crm.merge.opportunity.']}
+  },
+
+  {id:'account',icon:'📊',cat:'finance',
+   en:{name:'Accounting',tn:'account',desc:'Double-entry bookkeeping, invoicing, bank reconciliation, payment follow-up, multi-currency, tax management, and financial reporting.',
+    models:[
+     {name:'Account Move (Invoice/Bill)',tech:'account.move',desc:'Core accounting document — invoices, vendor bills, credit notes, and journal entries.',
+      fields:[{n:'name',t:'char',r:0,d:'Document reference (INV/2024/0001)'},{n:'move_type',t:'select',r:1,d:'out_invoice|out_refund|in_invoice|in_refund|entry'},{n:'partner_id',t:'many2one',r:0,d:'Customer or vendor'},{n:'invoice_date',t:'date',r:0,d:'Invoice date'},{n:'invoice_date_due',t:'date',r:0,d:'Payment due date'},{n:'journal_id',t:'many2one',r:1,d:'Journal (Sales, Purchase, Bank…)'},{n:'state',t:'select',r:1,d:'draft | posted | cancel'},{n:'amount_total',t:'float',r:0,d:'Total with tax'},{n:'amount_residual',t:'float',r:0,d:'Outstanding amount to pay'},{n:'payment_state',t:'select',r:0,d:'not_paid|partial|paid|reversed'},{n:'invoice_line_ids',t:'one2many',r:0,d:'Invoice product lines'},{n:'line_ids',t:'one2many',r:0,d:'All journal items (incl. taxes)'}]},
+     {name:'Account Move Line',tech:'account.move.line',desc:'Individual journal item — debit/credit entry on an account.',
+      fields:[{n:'move_id',t:'many2one',r:1,d:'Parent journal entry'},{n:'account_id',t:'many2one',r:1,d:'Chart of account line'},{n:'debit',t:'float',r:0,d:'Debit amount'},{n:'credit',t:'float',r:0,d:'Credit amount'},{n:'balance',t:'float',r:0,d:'debit − credit (computed)'},{n:'partner_id',t:'many2one',r:0,d:'Partner for receivable/payable'},{n:'reconciled',t:'bool',r:0,d:'Whether line is fully reconciled'}]},
+     {name:'Account (Chart of Accounts)',tech:'account.account',desc:'Represents one account in the chart of accounts.',
+      fields:[{n:'code',t:'char',r:1,d:'Account code (e.g. 400000)'},{n:'name',t:'char',r:1,d:'Account name'},{n:'account_type',t:'select',r:1,d:'asset|liability|equity|income|expense'},{n:'reconcile',t:'bool',r:0,d:'Enable reconciliation on this account'},{n:'deprecated',t:'bool',r:0,d:'Archive/hide account'}]},
+     {name:'Account Journal',tech:'account.journal',desc:'Classifies accounting entries.',
+      fields:[{n:'name',t:'char',r:1,d:'Journal name'},{n:'type',t:'select',r:1,d:'sale|purchase|cash|bank|general'},{n:'code',t:'char',r:1,d:'Short code (INV, BILL, BNK…)'},{n:'default_account_id',t:'many2one',r:0,d:'Default debit/credit account'},{n:'currency_id',t:'many2one',r:0,d:'Foreign currency if applicable'}]}
+    ],
+    wf:{title:'Invoice Lifecycle',states:['Draft','→','Posted','→','In Payment','→','Paid','/ Cancelled'],st:['start','','','','end','','end','cancel'],
+     steps:[{n:'01',t:'Create Draft',d:'Invoice created from sale order or manually. State = draft.'},{n:'02',t:'Post Invoice',d:'action_post() generates sequence number and journal entries.'},{n:'03',t:'Send to Customer',d:'Email PDF invoice via send & print dialog.'},{n:'04',t:'Register Payment',d:'Payment registered → reconcile with journal item.'},{n:'05',t:'Paid / Partial',d:'payment_state = "paid" when amount_residual = 0.'}]},
+    tips:['⚡ account.move is used for ALL accounting documents — move_type differentiates them.','⚡ Posting an invoice (action_post) is irreversible without a credit note.','⚡ Reconciliation matches receivable/payable lines to payments.','⚡ Fiscal positions remap accounts and taxes for different countries.']},
+   fr:{name:'Comptabilité',tn:'account',desc:'Comptabilité en partie double, facturation, rapprochement bancaire, suivi paiements, multi-devises, gestion fiscale et reporting financier.',
+    models:[
+     {name:'Écriture comptable (Facture/Avoir)',tech:'account.move',desc:'Document comptable central — factures, avoirs, notes de frais et écritures.',
+      fields:[{n:'name',t:'char',r:0,d:'Référence document (FAC/2024/0001)'},{n:'move_type',t:'select',r:1,d:'out_invoice|out_refund|in_invoice|in_refund|entry'},{n:'partner_id',t:'many2one',r:0,d:'Client ou fournisseur'},{n:'invoice_date',t:'date',r:0,d:'Date de facture'},{n:'invoice_date_due',t:'date',r:0,d:'Date d\'échéance'},{n:'journal_id',t:'many2one',r:1,d:'Journal (Ventes, Achats, Banque…)'},{n:'state',t:'select',r:1,d:'draft | posted | cancel'},{n:'amount_total',t:'float',r:0,d:'Montant total avec taxe'},{n:'amount_residual',t:'float',r:0,d:'Montant restant à payer'},{n:'payment_state',t:'select',r:0,d:'not_paid|partial|paid|reversed'},{n:'invoice_line_ids',t:'one2many',r:0,d:'Lignes de produits'},{n:'line_ids',t:'one2many',r:0,d:'Toutes lignes comptables (y compris taxes)'}]},
+     {name:'Ligne d\'écriture comptable',tech:'account.move.line',desc:'Ligne individuelle — débit/crédit sur un compte.',
+      fields:[{n:'move_id',t:'many2one',r:1,d:'Écriture parente'},{n:'account_id',t:'many2one',r:1,d:'Compte du plan comptable'},{n:'debit',t:'float',r:0,d:'Montant au débit'},{n:'credit',t:'float',r:0,d:'Montant au crédit'},{n:'balance',t:'float',r:0,d:'débit − crédit (calculé)'},{n:'partner_id',t:'many2one',r:0,d:'Partenaire clients/fournisseurs'},{n:'reconciled',t:'bool',r:0,d:'Ligne entièrement lettrée'}]},
+     {name:'Compte (Plan comptable)',tech:'account.account',desc:'Représente un compte dans le plan comptable.',
+      fields:[{n:'code',t:'char',r:1,d:'Code du compte (ex. 411000)'},{n:'name',t:'char',r:1,d:'Nom du compte'},{n:'account_type',t:'select',r:1,d:'asset|liability|equity|income|expense'},{n:'reconcile',t:'bool',r:0,d:'Activer le lettrage sur ce compte'},{n:'deprecated',t:'bool',r:0,d:'Archiver/masquer le compte'}]},
+     {name:'Journal comptable',tech:'account.journal',desc:'Classe les écritures comptables.',
+      fields:[{n:'name',t:'char',r:1,d:'Nom du journal'},{n:'type',t:'select',r:1,d:'sale|purchase|cash|bank|general'},{n:'code',t:'char',r:1,d:'Code court (FAC, ACH, BNQ…)'},{n:'default_account_id',t:'many2one',r:0,d:'Compte débit/crédit par défaut'},{n:'currency_id',t:'many2one',r:0,d:'Devise étrangère si applicable'}]}
+    ],
+    wf:{title:'Cycle de vie d\'une facture',states:['Brouillon','→','Validée','→','En Paiement','→','Payée','/ Annulée'],st:['start','','','','end','','end','cancel'],
+     steps:[{n:'01',t:'Créer brouillon',d:'Facture créée depuis commande ou manuellement. État = draft.'},{n:'02',t:'Valider la facture',d:'action_post() génère le numéro de séquence et les écritures.'},{n:'03',t:'Envoyer au client',d:'Envoi facture PDF par email.'},{n:'04',t:'Enregistrer paiement',d:'Paiement enregistré → lettrage avec la ligne comptable.'},{n:'05',t:'Payée / Partielle',d:'payment_state = "paid" quand amount_residual = 0.'}]},
+    tips:['⚡ account.move est utilisé pour TOUS les documents comptables — move_type les distingue.','⚡ La validation d\'une facture (action_post) est irréversible sans avoir.','⚡ Le lettrage associe les lignes clients/fournisseurs aux paiements.','⚡ Les positions fiscales remappent comptes et taxes selon les pays.']}
+  },
+
+  {id:'stock',icon:'📦',cat:'inventory',
+   en:{name:'Inventory',tn:'stock',desc:'Manages stock moves, warehouses, locations, picking operations, quants (physical stock), replenishment rules, and multi-step routes.',
+    models:[
+     {name:'Stock Picking',tech:'stock.picking',desc:'Represents a transfer or delivery order (receipts, deliveries, internal).',
+      fields:[{n:'name',t:'char',r:0,d:'Reference (WH/OUT/00001)'},{n:'picking_type_id',t:'many2one',r:1,d:'Operation type (Receipt, Delivery…)'},{n:'state',t:'select',r:1,d:'draft|waiting|confirmed|assigned|done|cancel'},{n:'partner_id',t:'many2one',r:0,d:'Vendor or customer'},{n:'location_id',t:'many2one',r:1,d:'Source location'},{n:'location_dest_id',t:'many2one',r:1,d:'Destination location'},{n:'move_ids',t:'one2many',r:0,d:'Stock moves in this transfer'},{n:'scheduled_date',t:'date',r:0,d:'Planned date'},{n:'date_done',t:'date',r:0,d:'Actual completion date'}]},
+     {name:'Stock Move',tech:'stock.move',desc:'Records the intended movement of a product between two locations.',
+      fields:[{n:'product_id',t:'many2one',r:1,d:'Product being moved'},{n:'product_uom_qty',t:'float',r:1,d:'Requested quantity'},{n:'quantity',t:'float',r:0,d:'Done quantity'},{n:'location_id',t:'many2one',r:1,d:'Source location'},{n:'location_dest_id',t:'many2one',r:1,d:'Destination location'},{n:'picking_id',t:'many2one',r:0,d:'Parent transfer'},{n:'state',t:'select',r:0,d:'draft|confirmed|assigned|done|cancel'}]},
+     {name:'Stock Quant',tech:'stock.quant',desc:'Represents the actual quantity of a product at a location.',
+      fields:[{n:'product_id',t:'many2one',r:1,d:'Product'},{n:'location_id',t:'many2one',r:1,d:'Storage location'},{n:'quantity',t:'float',r:0,d:'On-hand quantity'},{n:'reserved_quantity',t:'float',r:0,d:'Reserved for outgoing moves'},{n:'lot_id',t:'many2one',r:0,d:'Lot/serial number if tracked'}]},
+     {name:'Stock Warehouse',tech:'stock.warehouse',desc:'Represents a physical warehouse.',
+      fields:[{n:'name',t:'char',r:1,d:'Warehouse name'},{n:'code',t:'char',r:1,d:'Short code (WH…)'},{n:'lot_stock_id',t:'many2one',r:0,d:'Main stock location'},{n:'reception_steps',t:'select',r:0,d:'one_step|two_steps|three_steps'},{n:'delivery_steps',t:'select',r:0,d:'ship_only|pick_ship|pick_pack_ship'}]}
+    ],
+    wf:{title:'Delivery Order Flow',states:['Draft','→','Confirmed','→','Ready (Assigned)','→','Done','/ Cancel'],st:['start','','','','end','','end','cancel'],
+     steps:[{n:'01',t:'Generate Transfer',d:'Sale order confirmation generates a delivery picking automatically.'},{n:'02',t:'Reserve Stock',d:'Check availability: reserve quants for the outgoing move.'},{n:'03',t:'Validate',d:'Operator enters done quantities; validate() updates quants.'},{n:'04',t:'Backorder?',d:'If partial, Odoo asks to create a backorder for remaining qty.'},{n:'05',t:'Done',d:'Quants updated, move state = done, invoice can be created.'}]},
+    tips:['⚡ Understand the 3-step receipt (Input → Quality → Stock) and delivery routes.','⚡ stock.quant is the "truth" of physical inventory — not stock.move.','⚡ Replenishment uses orderpoints (stock.warehouse.orderpoint).','⚡ Lot tracking uses stock.lot; serial tracking = one quant per unit.']},
+   fr:{name:'Inventaire / Stock',tn:'stock',desc:'Gère les mouvements de stock, entrepôts, emplacements, transferts, quants, règles de réapprovisionnement et routes multi-étapes.',
+    models:[
+     {name:'Transfert de stock',tech:'stock.picking',desc:'Représente un bon de livraison, réception ou transfert interne.',
+      fields:[{n:'name',t:'char',r:0,d:'Référence (WH/OUT/00001)'},{n:'picking_type_id',t:'many2one',r:1,d:'Type d\'opération (Réception, Livraison…)'},{n:'state',t:'select',r:1,d:'draft|waiting|confirmed|assigned|done|cancel'},{n:'partner_id',t:'many2one',r:0,d:'Fournisseur ou client'},{n:'location_id',t:'many2one',r:1,d:'Emplacement source'},{n:'location_dest_id',t:'many2one',r:1,d:'Emplacement destination'},{n:'move_ids',t:'one2many',r:0,d:'Mouvements dans ce transfert'},{n:'scheduled_date',t:'date',r:0,d:'Date planifiée'},{n:'date_done',t:'date',r:0,d:'Date réelle d\'achèvement'}]},
+     {name:'Mouvement de stock',tech:'stock.move',desc:'Enregistre le mouvement prévu d\'un produit entre deux emplacements.',
+      fields:[{n:'product_id',t:'many2one',r:1,d:'Produit déplacé'},{n:'product_uom_qty',t:'float',r:1,d:'Quantité demandée'},{n:'quantity',t:'float',r:0,d:'Quantité réalisée'},{n:'location_id',t:'many2one',r:1,d:'Emplacement source'},{n:'location_dest_id',t:'many2one',r:1,d:'Emplacement destination'},{n:'picking_id',t:'many2one',r:0,d:'Transfert parent'},{n:'state',t:'select',r:0,d:'draft|confirmed|assigned|done|cancel'}]},
+     {name:'Quantité disponible (Quant)',tech:'stock.quant',desc:'Représente la quantité réelle d\'un produit à un emplacement.',
+      fields:[{n:'product_id',t:'many2one',r:1,d:'Produit'},{n:'location_id',t:'many2one',r:1,d:'Emplacement de stockage'},{n:'quantity',t:'float',r:0,d:'Quantité en stock'},{n:'reserved_quantity',t:'float',r:0,d:'Réservé pour mouvements sortants'},{n:'lot_id',t:'many2one',r:0,d:'Lot/numéro de série si tracé'}]},
+     {name:'Entrepôt',tech:'stock.warehouse',desc:'Représente un entrepôt physique.',
+      fields:[{n:'name',t:'char',r:1,d:'Nom de l\'entrepôt'},{n:'code',t:'char',r:1,d:'Code court (ENT…)'},{n:'lot_stock_id',t:'many2one',r:0,d:'Emplacement de stock principal'},{n:'reception_steps',t:'select',r:0,d:'one_step|two_steps|three_steps'},{n:'delivery_steps',t:'select',r:0,d:'ship_only|pick_ship|pick_pack_ship'}]}
+    ],
+    wf:{title:'Flux d\'un bon de livraison',states:['Brouillon','→','Confirmé','→','Prêt (Réservé)','→','Terminé','/ Annulé'],st:['start','','','','end','','end','cancel'],
+     steps:[{n:'01',t:'Générer le transfert',d:'Confirmation de commande génère automatiquement un bon de livraison.'},{n:'02',t:'Réserver le stock',d:'Vérifier disponibilité : réserver les quants pour le mouvement sortant.'},{n:'03',t:'Valider',d:'L\'opérateur saisit les quantités ; validate() met à jour les quants.'},{n:'04',t:'Reliquat ?',d:'Si partiel, Odoo propose de créer un reliquat pour la qté restante.'},{n:'05',t:'Terminé',d:'Quants mis à jour, état mouvement = done, facturation possible.'}]},
+    tips:['⚡ Comprendre la réception en 3 étapes (Entrée → Contrôle → Stock) et routes de livraison.','⚡ stock.quant est la "vérité" du stock physique — pas stock.move.','⚡ Le réapprovisionnement utilise les règles min/max (stock.warehouse.orderpoint).','⚡ Suivi par lot : stock.lot ; par numéro de série = un quant par unité.']}
+  },
+
+  {id:'base',icon:'⚙️',cat:'technical',
+   en:{name:'Base',tn:'base',desc:'The foundational Odoo module. Contains res.partner, res.users, res.company, ir.model, and all core ORM infrastructure.',
+    models:[
+     {name:'Partner',tech:'res.partner',desc:'Represents any entity: customer, vendor, employee, company, or contact.',
+      fields:[{n:'name',t:'char',r:1,d:'Name'},{n:'is_company',t:'bool',r:0,d:'True if company, False if individual'},{n:'parent_id',t:'many2one',r:0,d:'Parent company (for contacts)'},{n:'email',t:'char',r:0,d:'Email address'},{n:'phone',t:'char',r:0,d:'Phone number'},{n:'vat',t:'char',r:0,d:'Tax ID / VAT number'},{n:'customer_rank',t:'int',r:0,d:'>0 = treated as customer'},{n:'supplier_rank',t:'int',r:0,d:'>0 = treated as vendor'},{n:'country_id',t:'many2one',r:0,d:'Country'},{n:'lang',t:'char',r:0,d:'Preferred language code'},{n:'active',t:'bool',r:0,d:'Archived if False'}]},
+     {name:'Users',tech:'res.users',desc:'System user with login credentials and access rights. Extends res.partner.',
+      fields:[{n:'name',t:'char',r:1,d:'Full name (from partner)'},{n:'login',t:'char',r:1,d:'Username for login'},{n:'password',t:'char',r:1,d:'Hashed password'},{n:'groups_id',t:'many2many',r:0,d:'Security groups'},{n:'active',t:'bool',r:0,d:'Whether user can log in'},{n:'share',t:'bool',r:0,d:'True if portal user'}]},
+     {name:'Company',tech:'res.company',desc:'Multi-company entity — all records scoped per company.',
+      fields:[{n:'name',t:'char',r:1,d:'Company name'},{n:'partner_id',t:'many2one',r:1,d:'Contact/address (res.partner)'},{n:'currency_id',t:'many2one',r:1,d:'Company currency'},{n:'parent_id',t:'many2one',r:0,d:'Parent company (branches)'},{n:'logo',t:'binary',r:0,d:'Company logo'}]}
+    ],
+    wf:{title:'User Authentication Flow',states:['Login Request','→','Authentication','→','Session Active','→','Logout'],st:['start','','','end'],
+     steps:[{n:'01',t:'Login',d:'User submits login/password. authenticate() verifies credentials.'},{n:'02',t:'Access Rights',d:'Groups checked via ir.rule and ir.model.access records.'},{n:'03',t:'Session',d:'Session cookie created; user context (uid, lang, tz) established.'},{n:'04',t:'Logout',d:'Session invalidated on logout or timeout.'}]},
+    tips:['⚡ res.partner is the master contact model — customers, vendors, employees all use it.','⚡ customer_rank and supplier_rank are integers, not booleans.','⚡ All models have company_id for multi-company; ir.rule enforces record rules.','⚡ res.users inherits from res.partner via _inherits — not _inherit.']},
+   fr:{name:'Base',tn:'base',desc:'Le module fondamental d\'Odoo. Contient res.partner, res.users, res.company, ir.model et toute l\'infrastructure ORM principale.',
+    models:[
+     {name:'Partenaire',tech:'res.partner',desc:'Représente toute entité : client, fournisseur, employé, société ou contact.',
+      fields:[{n:'name',t:'char',r:1,d:'Nom'},{n:'is_company',t:'bool',r:0,d:'True si société, False si particulier'},{n:'parent_id',t:'many2one',r:0,d:'Société mère (pour les contacts)'},{n:'email',t:'char',r:0,d:'Adresse email'},{n:'phone',t:'char',r:0,d:'Numéro de téléphone'},{n:'vat',t:'char',r:0,d:'Numéro de TVA / SIRET'},{n:'customer_rank',t:'int',r:0,d:'>0 = traité comme client'},{n:'supplier_rank',t:'int',r:0,d:'>0 = traité comme fournisseur'},{n:'country_id',t:'many2one',r:0,d:'Pays'},{n:'lang',t:'char',r:0,d:'Code de langue préféré'},{n:'active',t:'bool',r:0,d:'Archivé si False'}]},
+     {name:'Utilisateurs',tech:'res.users',desc:'Utilisateur système avec identifiants et droits d\'accès. Étend res.partner.',
+      fields:[{n:'name',t:'char',r:1,d:'Nom complet (depuis partenaire)'},{n:'login',t:'char',r:1,d:'Identifiant de connexion'},{n:'password',t:'char',r:1,d:'Mot de passe haché'},{n:'groups_id',t:'many2many',r:0,d:'Groupes de sécurité'},{n:'active',t:'bool',r:0,d:'Peut se connecter si True'},{n:'share',t:'bool',r:0,d:'True si utilisateur portail'}]},
+     {name:'Société',tech:'res.company',desc:'Entité multi-société — tous les enregistrements scopés par société.',
+      fields:[{n:'name',t:'char',r:1,d:'Nom de la société'},{n:'partner_id',t:'many2one',r:1,d:'Contact/adresse (res.partner)'},{n:'currency_id',t:'many2one',r:1,d:'Devise de la société'},{n:'parent_id',t:'many2one',r:0,d:'Société mère (filiales)'},{n:'logo',t:'binary',r:0,d:'Logo de la société'}]}
+    ],
+    wf:{title:'Flux d\'authentification utilisateur',states:['Demande connexion','→','Authentification','→','Session Active','→','Déconnexion'],st:['start','','','end'],
+     steps:[{n:'01',t:'Connexion',d:'L\'utilisateur soumet identifiant/mot de passe. authenticate() vérifie les credentials.'},{n:'02',t:'Droits d\'accès',d:'Groupes vérifiés via ir.rule et ir.model.access.'},{n:'03',t:'Session',d:'Cookie de session créé ; contexte utilisateur (uid, lang, tz) établi.'},{n:'04',t:'Déconnexion',d:'Session invalidée à la déconnexion ou expiration.'}]},
+    tips:['⚡ res.partner est le modèle de contact principal — clients, fournisseurs, employés l\'utilisent tous.','⚡ customer_rank et supplier_rank sont des entiers, pas des booléens.','⚡ Tous les modèles ont company_id pour le multi-société ; ir.rule applique les règles d\'enregistrement.','⚡ res.users hérite de res.partner via _inherits — et non _inherit.']}
+  },
+
+  {id:'mail',icon:'💬',cat:'technical',
+   en:{name:'Discuss / Mail',tn:'mail',desc:'Messaging, chatter, activities, email gateway, followers, and notification framework. Used by virtually every Odoo model.',
+    models:[
+     {name:'Mail Thread (Mixin)',tech:'mail.thread',desc:'Abstract mixin that adds chatter to any model.',
+      fields:[{n:'message_ids',t:'one2many',r:0,d:'All messages in chatter'},{n:'message_follower_ids',t:'one2many',r:0,d:'Follower records'},{n:'activity_ids',t:'one2many',r:0,d:'Scheduled activities'}]},
+     {name:'Mail Message',tech:'mail.message',desc:'A single message, note, or email in the chatter.',
+      fields:[{n:'body',t:'text',r:0,d:'HTML message content'},{n:'author_id',t:'many2one',r:0,d:'Sender (res.partner)'},{n:'model',t:'char',r:0,d:'Related model name (e.g. sale.order)'},{n:'res_id',t:'int',r:0,d:'ID of the related record'},{n:'message_type',t:'select',r:0,d:'comment|email|notification|user_notification'},{n:'subtype_id',t:'many2one',r:0,d:'Message subtype for filtering'}]},
+     {name:'Mail Activity',tech:'mail.activity',desc:'Scheduled action on a record (call, meeting, email, to-do).',
+      fields:[{n:'activity_type_id',t:'many2one',r:1,d:'Type (Call, Email, To-Do…)'},{n:'summary',t:'char',r:0,d:'Short description'},{n:'date_deadline',t:'date',r:1,d:'Due date'},{n:'user_id',t:'many2one',r:1,d:'Assigned user'},{n:'res_model',t:'char',r:1,d:'Model this activity is on'},{n:'res_id',t:'int',r:1,d:'Record ID'}]}
+    ],
+    wf:{title:'Activity Lifecycle',states:['Scheduled','→','Due / Overdue','→','Done / Cancelled'],st:['start','','end','cancel'],
+     steps:[{n:'01',t:'Schedule Activity',d:'User schedules activity with type, deadline, and assignee.'},{n:'02',t:'Notification',d:'Assigned user sees activity in Activity view.'},{n:'03',t:'Mark Done',d:'Activity completed via action_feedback() — optional note logged.'},{n:'04',t:'Auto-Archive',d:'Completed activities auto-archived; overdue shown in red.'}]},
+    tips:['⚡ Add chatter to your custom model: inherit mail.thread and mail.activity.mixin.','⚡ message_post() is the method to programmatically post to chatter.','⚡ Followers = subscribers to notifications via message_follower_ids.']},
+   fr:{name:'Discussion / Mail',tn:'mail',desc:'Messagerie, chatter, activités, passerelle email, abonnés et framework de notifications. Utilisé par pratiquement tous les modèles Odoo.',
+    models:[
+     {name:'Fil de messagerie (Mixin)',tech:'mail.thread',desc:'Mixin abstrait qui ajoute le chatter à n\'importe quel modèle.',
+      fields:[{n:'message_ids',t:'one2many',r:0,d:'Tous les messages du chatter'},{n:'message_follower_ids',t:'one2many',r:0,d:'Enregistrements abonnés'},{n:'activity_ids',t:'one2many',r:0,d:'Activités planifiées'}]},
+     {name:'Message',tech:'mail.message',desc:'Un message individuel, note ou email dans le chatter.',
+      fields:[{n:'body',t:'text',r:0,d:'Contenu HTML du message'},{n:'author_id',t:'many2one',r:0,d:'Expéditeur (res.partner)'},{n:'model',t:'char',r:0,d:'Nom du modèle lié (ex. sale.order)'},{n:'res_id',t:'int',r:0,d:'ID de l\'enregistrement lié'},{n:'message_type',t:'select',r:0,d:'comment|email|notification|user_notification'},{n:'subtype_id',t:'many2one',r:0,d:'Sous-type de message'}]},
+     {name:'Activité',tech:'mail.activity',desc:'Action planifiée sur un enregistrement.',
+      fields:[{n:'activity_type_id',t:'many2one',r:1,d:'Type (Appel, Email, Tâche…)'},{n:'summary',t:'char',r:0,d:'Description courte'},{n:'date_deadline',t:'date',r:1,d:'Date d\'échéance'},{n:'user_id',t:'many2one',r:1,d:'Utilisateur assigné'},{n:'res_model',t:'char',r:1,d:'Modèle de l\'activité'},{n:'res_id',t:'int',r:1,d:'ID de l\'enregistrement'}]}
+    ],
+    wf:{title:'Cycle de vie d\'une activité',states:['Planifiée','→','Échue / En retard','→','Terminée / Annulée'],st:['start','','end','cancel'],
+     steps:[{n:'01',t:'Planifier l\'activité',d:'L\'utilisateur planifie avec type, date limite et responsable.'},{n:'02',t:'Notification',d:'L\'utilisateur assigné voit l\'activité dans la vue Activités.'},{n:'03',t:'Marquer terminée',d:'Activité complétée via action_feedback() — note optionnelle.'},{n:'04',t:'Auto-archivage',d:'Activités terminées archivées ; les en retard affichées en rouge.'}]},
+    tips:['⚡ Ajouter le chatter à votre modèle custom : hériter de mail.thread et mail.activity.mixin.','⚡ message_post() est la méthode pour poster dans le chatter par programmation.','⚡ Abonnés = souscripteurs aux notifications via message_follower_ids.']}
+  },
+
+  {id:'project',icon:'📋',cat:'project',
+   en:{name:'Project',tn:'project',desc:'Task and project management with Kanban/Gantt views, milestones, timesheets, and billing integration for service businesses.',
+    models:[
+     {name:'Project',tech:'project.project',desc:'Container for tasks with billing, privacy, and stage settings.',
+      fields:[{n:'name',t:'char',r:1,d:'Project name'},{n:'user_id',t:'many2one',r:0,d:'Project manager'},{n:'partner_id',t:'many2one',r:0,d:'Customer'},{n:'task_ids',t:'one2many',r:0,d:'All tasks in project'},{n:'date_start',t:'date',r:0,d:'Start date'},{n:'date',t:'date',r:0,d:'End date'},{n:'privacy_visibility',t:'select',r:0,d:'followers|employees|portal'},{n:'allow_billable',t:'bool',r:0,d:'Enable billing for this project'},{n:'sale_order_id',t:'many2one',r:0,d:'Linked sale order for billing'}]},
+     {name:'Task',tech:'project.task',desc:'A unit of work within a project, managed through kanban stages.',
+      fields:[{n:'name',t:'char',r:1,d:'Task title'},{n:'project_id',t:'many2one',r:0,d:'Parent project'},{n:'stage_id',t:'many2one',r:0,d:'Current stage (project.task.type)'},{n:'user_ids',t:'many2many',r:0,d:'Assignees'},{n:'date_deadline',t:'date',r:0,d:'Deadline'},{n:'priority',t:'select',r:0,d:'0 = normal, 1 = urgent'},{n:'timesheet_ids',t:'one2many',r:0,d:'Time entries on this task'},{n:'planned_hours',t:'float',r:0,d:'Initially planned hours'}]}
+    ],
+    wf:{title:'Task Lifecycle',states:['New / Backlog','→','In Progress','→','Review','→','Done'],st:['start','','','','end'],
+     steps:[{n:'01',t:'Create Task',d:'Task created with title, assignee, deadline, and estimated hours.'},{n:'02',t:'Move Stages',d:'Drag across kanban columns or set stage_id programmatically.'},{n:'03',t:'Log Timesheets',d:'Employees log time via timesheets (account.analytic.line).'},{n:'04',t:'Mark Done',d:'Task state = done. Billable tasks trigger invoice lines.'}]},
+    tips:['⚡ project.task.type are stages — shared or project-specific (project_ids field).','⚡ Timesheets are stored in account.analytic.line, linked via task_id.','⚡ allow_billable on project enables the billing section in task configuration.']},
+   fr:{name:'Projet',tn:'project',desc:'Gestion de tâches et projets avec vues Kanban/Gantt, jalons, feuilles de temps et intégration facturation pour entreprises de services.',
+    models:[
+     {name:'Projet',tech:'project.project',desc:'Conteneur de tâches avec paramètres de facturation, confidentialité et étapes.',
+      fields:[{n:'name',t:'char',r:1,d:'Nom du projet'},{n:'user_id',t:'many2one',r:0,d:'Chef de projet'},{n:'partner_id',t:'many2one',r:0,d:'Client'},{n:'task_ids',t:'one2many',r:0,d:'Toutes les tâches du projet'},{n:'date_start',t:'date',r:0,d:'Date de début'},{n:'date',t:'date',r:0,d:'Date de fin'},{n:'privacy_visibility',t:'select',r:0,d:'followers|employees|portal'},{n:'allow_billable',t:'bool',r:0,d:'Activer la facturation pour ce projet'},{n:'sale_order_id',t:'many2one',r:0,d:'Commande client liée pour la facturation'}]},
+     {name:'Tâche',tech:'project.task',desc:'Unité de travail dans un projet, gérée via des étapes kanban.',
+      fields:[{n:'name',t:'char',r:1,d:'Titre de la tâche'},{n:'project_id',t:'many2one',r:0,d:'Projet parent'},{n:'stage_id',t:'many2one',r:0,d:'Étape actuelle (project.task.type)'},{n:'user_ids',t:'many2many',r:0,d:'Responsables assignés'},{n:'date_deadline',t:'date',r:0,d:'Date limite'},{n:'priority',t:'select',r:0,d:'0 = normal, 1 = urgent'},{n:'timesheet_ids',t:'one2many',r:0,d:'Feuilles de temps sur cette tâche'},{n:'planned_hours',t:'float',r:0,d:'Heures planifiées initialement'}]}
+    ],
+    wf:{title:'Cycle de vie d\'une tâche',states:['Nouveau / Backlog','→','En cours','→','Révision','→','Terminé'],st:['start','','','','end'],
+     steps:[{n:'01',t:'Créer la tâche',d:'Tâche créée avec titre, responsable, date limite et heures estimées.'},{n:'02',t:'Changer d\'étape',d:'Glisser dans les colonnes kanban ou modifier stage_id.'},{n:'03',t:'Saisir les feuilles de temps',d:'Les employés saisissent le temps via account.analytic.line.'},{n:'04',t:'Marquer terminée',d:'État tâche = done. Les tâches facturables déclenchent des lignes de facture.'}]},
+    tips:['⚡ project.task.type sont les étapes — partagées ou spécifiques au projet (champ project_ids).','⚡ Les feuilles de temps sont dans account.analytic.line, liées via task_id.','⚡ allow_billable sur le projet active la section facturation dans la configuration des tâches.']}
+  },
+
+  {id:'hr',icon:'👥',cat:'hr',
+   en:{name:'Employees',tn:'hr',desc:'Core HR module managing employee records, contracts, departments, job positions, and organizational structure.',
+    models:[
+     {name:'Employee',tech:'hr.employee',desc:'Stores all employee personal and professional information.',
+      fields:[{n:'name',t:'char',r:1,d:'Employee full name'},{n:'job_id',t:'many2one',r:0,d:'Job position (hr.job)'},{n:'job_title',t:'char',r:0,d:'Custom job title'},{n:'department_id',t:'many2one',r:0,d:'Department'},{n:'parent_id',t:'many2one',r:0,d:'Manager (hr.employee)'},{n:'user_id',t:'many2one',r:0,d:'Related internal user'},{n:'work_email',t:'char',r:0,d:'Professional email'},{n:'active',t:'bool',r:0,d:'False when archived'},{n:'address_home_id',t:'many2one',r:0,d:'Private address (res.partner)'}]},
+     {name:'Department',tech:'hr.department',desc:'Represents an organizational department.',
+      fields:[{n:'name',t:'char',r:1,d:'Department name'},{n:'parent_id',t:'many2one',r:0,d:'Parent department (hierarchy)'},{n:'manager_id',t:'many2one',r:0,d:'Department manager'},{n:'company_id',t:'many2one',r:1,d:'Company'}]}
+    ],
+    wf:{title:'Employee Onboarding',states:['Created','→','Active Employee','→','Archived'],st:['start','','end','','cancel'],
+     steps:[{n:'01',t:'Create Record',d:'HR creates employee record with personal details and job info.'},{n:'02',t:'Link User',d:'Optionally link to an internal user (user_id).'},{n:'03',t:'Create Contract',d:'HR contract defined with wage, dates, and structure type.'},{n:'04',t:'Active',d:'Employee visible in payslips, leaves, etc.'},{n:'05',t:'Archive',d:'On departure, employee archived (active=False).'}]},
+    tips:['⚡ hr.employee and res.users are linked via user_id — not the same model.','⚡ address_home_id is a private res.partner (distinct from work address).','⚡ Department hierarchy uses parent_id recursion — useful for org charts.']},
+   fr:{name:'Employés',tn:'hr',desc:'Module RH principal gérant fiches employés, contrats, départements, postes et structure organisationnelle.',
+    models:[
+     {name:'Employé',tech:'hr.employee',desc:'Stocke toutes les informations personnelles et professionnelles de l\'employé.',
+      fields:[{n:'name',t:'char',r:1,d:'Nom complet de l\'employé'},{n:'job_id',t:'many2one',r:0,d:'Poste de travail (hr.job)'},{n:'job_title',t:'char',r:0,d:'Intitulé de poste personnalisé'},{n:'department_id',t:'many2one',r:0,d:'Département'},{n:'parent_id',t:'many2one',r:0,d:'Responsable (hr.employee)'},{n:'user_id',t:'many2one',r:0,d:'Utilisateur interne lié'},{n:'work_email',t:'char',r:0,d:'Email professionnel'},{n:'active',t:'bool',r:0,d:'False si archivé'},{n:'address_home_id',t:'many2one',r:0,d:'Adresse privée (res.partner)'}]},
+     {name:'Département',tech:'hr.department',desc:'Représente un département organisationnel.',
+      fields:[{n:'name',t:'char',r:1,d:'Nom du département'},{n:'parent_id',t:'many2one',r:0,d:'Département parent (hiérarchie)'},{n:'manager_id',t:'many2one',r:0,d:'Responsable du département'},{n:'company_id',t:'many2one',r:1,d:'Société'}]}
+    ],
+    wf:{title:'Intégration d\'un employé',states:['Créé','→','Employé Actif','→','Archivé'],st:['start','','end','','cancel'],
+     steps:[{n:'01',t:'Créer la fiche',d:'Le RH crée la fiche employé avec infos personnelles et poste.'},{n:'02',t:'Lier un utilisateur',d:'Lier optionnellement à un utilisateur interne (user_id).'},{n:'03',t:'Créer un contrat',d:'Contrat RH défini avec salaire, dates et type de structure.'},{n:'04',t:'Actif',d:'L\'employé est visible dans les fiches de paie, congés, etc.'},{n:'05',t:'Archiver',d:'Au départ, l\'employé est archivé (active=False).'}]},
+    tips:['⚡ hr.employee et res.users sont liés via user_id — ce ne sont pas le même modèle.','⚡ address_home_id est un res.partner privé (distinct de l\'adresse professionnelle).','⚡ La hiérarchie des départements utilise la récursivité de parent_id.']}
+  },
+
+  {id:'mrp',icon:'🏭',cat:'manufacture',
+   en:{name:'Manufacturing',tn:'mrp',desc:'Bill of Materials, production orders, work orders, routings, and manufacturing resource planning. Integrates with Inventory.',
+    models:[
+     {name:'Manufacturing Order',tech:'mrp.production',desc:'Represents an instruction to produce a quantity of a product.',
+      fields:[{n:'name',t:'char',r:0,d:'MO reference (WH/MO/00001)'},{n:'product_id',t:'many2one',r:1,d:'Product to manufacture'},{n:'product_qty',t:'float',r:1,d:'Quantity to produce'},{n:'bom_id',t:'many2one',r:0,d:'Bill of Materials used'},{n:'state',t:'select',r:1,d:'draft|confirmed|progress|to_close|done|cancel'},{n:'date_planned_start',t:'date',r:0,d:'Planned start date'},{n:'move_raw_ids',t:'one2many',r:0,d:'Component consumption moves'},{n:'move_finished_ids',t:'one2many',r:0,d:'Finished product moves'},{n:'workorder_ids',t:'one2many',r:0,d:'Work orders (if routing used)'}]},
+     {name:'Bill of Materials',tech:'mrp.bom',desc:'Defines the components and quantities needed to produce a product.',
+      fields:[{n:'product_tmpl_id',t:'many2one',r:1,d:'Product being produced'},{n:'product_qty',t:'float',r:1,d:'Quantity produced by this BoM'},{n:'type',t:'select',r:1,d:'normal|phantom (kit)|subcontract'},{n:'bom_line_ids',t:'one2many',r:0,d:'Component lines'},{n:'routing_id',t:'many2one',r:0,d:'Operations/routing sequence'}]}
+    ],
+    wf:{title:'Manufacturing Order Flow',states:['Draft','→','Confirmed','→','In Progress','→','Done','/ Cancel'],st:['start','','','','end','','end','cancel'],
+     steps:[{n:'01',t:'Create MO',d:'MO created from reorder rule, sale order, or manually.'},{n:'02',t:'Confirm',d:'Components reserved. Work orders generated if routing exists.'},{n:'03',t:'Produce',d:'Record components consumed and finished product quantities.'},{n:'04',t:'Validate',d:'MO validated → finished goods added to stock.'}]},
+    tips:['⚡ BoM type "phantom" = Kit — components bypass the MO and go straight to stock.','⚡ move_raw_ids = components consumed; move_finished_ids = finished product output.','⚡ Subcontracting BoM type triggers vendor receipt flow automatically.']},
+   fr:{name:'Fabrication',tn:'mrp',desc:'Nomenclatures, ordres de fabrication, opérations, gammes et planification des ressources de production. S\'intègre avec le Stock.',
+    models:[
+     {name:'Ordre de fabrication',tech:'mrp.production',desc:'Représente une instruction de production pour une quantité de produit.',
+      fields:[{n:'name',t:'char',r:0,d:'Référence OF (ENT/OF/00001)'},{n:'product_id',t:'many2one',r:1,d:'Produit à fabriquer'},{n:'product_qty',t:'float',r:1,d:'Quantité à produire'},{n:'bom_id',t:'many2one',r:0,d:'Nomenclature utilisée'},{n:'state',t:'select',r:1,d:'draft|confirmed|progress|to_close|done|cancel'},{n:'date_planned_start',t:'date',r:0,d:'Date de début planifiée'},{n:'move_raw_ids',t:'one2many',r:0,d:'Mouvements consommation composants'},{n:'move_finished_ids',t:'one2many',r:0,d:'Mouvements produits finis'},{n:'workorder_ids',t:'one2many',r:0,d:'Opérations de fabrication'}]},
+     {name:'Nomenclature (BoM)',tech:'mrp.bom',desc:'Définit les composants et quantités nécessaires pour produire un produit.',
+      fields:[{n:'product_tmpl_id',t:'many2one',r:1,d:'Produit fabriqué'},{n:'product_qty',t:'float',r:1,d:'Quantité produite par cette nomenclature'},{n:'type',t:'select',r:1,d:'normal|phantom (kit)|subcontract'},{n:'bom_line_ids',t:'one2many',r:0,d:'Lignes de composants'},{n:'routing_id',t:'many2one',r:0,d:'Séquence d\'opérations / gamme'}]}
+    ],
+    wf:{title:'Flux d\'un ordre de fabrication',states:['Brouillon','→','Confirmé','→','En cours','→','Terminé','/ Annulé'],st:['start','','','','end','','end','cancel'],
+     steps:[{n:'01',t:'Créer l\'OF',d:'OF créé depuis une règle de stock, commande ou manuellement.'},{n:'02',t:'Confirmer',d:'Composants réservés. Opérations générées si gamme définie.'},{n:'03',t:'Produire',d:'Enregistrer composants consommés et quantités de produits finis.'},{n:'04',t:'Valider',d:'OF validé → produits finis ajoutés au stock.'}]},
+    tips:['⚡ Nomenclature type "phantom" = Kit — les composants contournent l\'OF et vont directement au stock.','⚡ move_raw_ids = composants consommés ; move_finished_ids = produits finis.','⚡ Le type "sous-traitance" déclenche automatiquement le flux de réception fournisseur.']}
+  },
+
+  {id:'hr_payroll',icon:'💰',cat:'hr',
+   en:{name:'Payroll',tn:'hr_payroll',desc:'Payslip generation, salary rules, payroll structures, contribution registers, and payroll journals.',
+    models:[
+     {name:'Payslip',tech:'hr.payslip',desc:'Represents a single pay period payslip for one employee.',
+      fields:[{n:'employee_id',t:'many2one',r:1,d:'Employee'},{n:'date_from',t:'date',r:1,d:'Pay period start'},{n:'date_to',t:'date',r:1,d:'Pay period end'},{n:'struct_id',t:'many2one',r:1,d:'Salary structure'},{n:'state',t:'select',r:1,d:'draft|verify|done|cancel'},{n:'line_ids',t:'one2many',r:0,d:'Computed salary rule lines'},{n:'net_wage',t:'float',r:0,d:'Net salary (computed)'}]},
+     {name:'Salary Rule',tech:'hr.salary.rule',desc:'Formula-based rule that computes a specific earnings/deduction.',
+      fields:[{n:'name',t:'char',r:1,d:'Rule name (e.g. Basic Salary)'},{n:'code',t:'char',r:1,d:'Short code used in formulas (BASIC)'},{n:'category_id',t:'many2one',r:1,d:'Category (BASIC, ALW, DED, NET…)'},{n:'amount_python_compute',t:'text',r:0,d:'Python formula to compute amount'},{n:'condition_python',t:'text',r:0,d:'Python condition to apply rule'}]}
+    ],
+    wf:{title:'Payslip Processing',states:['Draft','→','Waiting (Verify)','→','Done','/ Cancel'],st:['start','','end','','cancel'],
+     steps:[{n:'01',t:'Create Payslip',d:'Payslip created for employee with pay period and structure.'},{n:'02',t:'Compute Sheet',d:'compute_sheet() runs Python salary rules and populates lines.'},{n:'03',t:'Validate',d:'HR confirms payslip. State → done. Journal entries posted.'},{n:'04',t:'Pay Employee',d:'Payment batch registered in accounting.'}]},
+    tips:['⚡ Salary rules use Python: result = contract.wage — know the context variables.','⚡ Categories: BASIC, ALW (allowance), DED (deduction), GROSS, NET, COMP.','⚡ hr.payslip.run is the batch model for processing all employees at once.']},
+   fr:{name:'Paie',tn:'hr_payroll',desc:'Génération de bulletins de salaire, règles salariales, structures de rémunération, registres de cotisations et journaux de paie.',
+    models:[
+     {name:'Bulletin de salaire',tech:'hr.payslip',desc:'Représente un bulletin de salaire pour une période de paie.',
+      fields:[{n:'employee_id',t:'many2one',r:1,d:'Employé'},{n:'date_from',t:'date',r:1,d:'Début de la période de paie'},{n:'date_to',t:'date',r:1,d:'Fin de la période de paie'},{n:'struct_id',t:'many2one',r:1,d:'Structure salariale'},{n:'state',t:'select',r:1,d:'draft|verify|done|cancel'},{n:'line_ids',t:'one2many',r:0,d:'Lignes de règles salariales calculées'},{n:'net_wage',t:'float',r:0,d:'Salaire net (calculé)'}]},
+     {name:'Règle salariale',tech:'hr.salary.rule',desc:'Règle basée sur des formules qui calcule une rubrique de salaire.',
+      fields:[{n:'name',t:'char',r:1,d:'Nom de la règle (ex. Salaire de base)'},{n:'code',t:'char',r:1,d:'Code court utilisé dans les formules (BASIC)'},{n:'category_id',t:'many2one',r:1,d:'Catégorie (BASIC, ALW, DED, NET…)'},{n:'amount_python_compute',t:'text',r:0,d:'Formule Python pour calculer le montant'},{n:'condition_python',t:'text',r:0,d:'Condition Python pour appliquer la règle'}]}
+    ],
+    wf:{title:'Traitement d\'un bulletin de salaire',states:['Brouillon','→','En attente (Vérif.)','→','Validé','/ Annulé'],st:['start','','end','','cancel'],
+     steps:[{n:'01',t:'Créer le bulletin',d:'Bulletin créé pour l\'employé avec période et structure salariale.'},{n:'02',t:'Calculer',d:'compute_sheet() exécute les règles Python et remplit les lignes.'},{n:'03',t:'Valider',d:'Le RH confirme. État → done. Écritures comptables générées.'},{n:'04',t:'Payer l\'employé',d:'Lot de paiement enregistré en comptabilité.'}]},
+    tips:['⚡ Les règles utilisent Python : result = contract.wage — connaître les variables de contexte.','⚡ Catégories : BASIC, ALW (avantage), DED (retenue), GROSS, NET, COMP.','⚡ hr.payslip.run est le modèle de lot pour traiter tous les employés en une fois.']}
+  },
+
+  {id:'hr_leave',icon:'🏖️',cat:'hr',
+   en:{name:'Time Off',tn:'hr_holidays',desc:'Leave management: leave types, allocation requests, leave requests, and manager approvals. Integrates with payroll and timesheets.',
+    models:[
+     {name:'Leave Request',tech:'hr.leave',desc:'Represents an employee leave (time-off) request.',
+      fields:[{n:'holiday_status_id',t:'many2one',r:1,d:'Leave type'},{n:'employee_id',t:'many2one',r:1,d:'Employee requesting leave'},{n:'date_from',t:'date',r:1,d:'Start date'},{n:'date_to',t:'date',r:1,d:'End date'},{n:'number_of_days',t:'float',r:0,d:'Duration in days (computed)'},{n:'state',t:'select',r:1,d:'draft|confirm|validate1|validate|refuse'},{n:'holiday_type',t:'select',r:1,d:'employee|department|company|category'}]},
+     {name:'Leave Type',tech:'hr.leave.type',desc:'Configures a type of leave (Paid, Sick, Unpaid…).',
+      fields:[{n:'name',t:'char',r:1,d:'Leave type name'},{n:'allocation_type',t:'select',r:1,d:'fixed|accrual|no_limit'},{n:'leave_validation_type',t:'select',r:1,d:'no_validation|time_off|both'},{n:'virtual_remaining_leaves',t:'float',r:0,d:'Remaining days (computed per employee)'},{n:'requires_allocation',t:'select',r:0,d:'yes|no'}]}
+    ],
+    wf:{title:'Leave Request Approval',states:['Draft','→','Confirmed','→','Approved (1st)','→','Validated','/ Refused'],st:['start','','','end','','cancel'],
+     steps:[{n:'01',t:'Submit Request',d:'Employee submits leave request. State = confirm.'},{n:'02',t:'First Approval',d:'If 2-level approval configured, team leader approves first.'},{n:'03',t:'HR Validation',d:'HR manager validates. State = validate. Balance deducted.'},{n:'04',t:'Refuse',d:'Manager or HR refuses — state = refuse with optional reason.'}]},
+    tips:['⚡ hr.leave handles BOTH allocations and actual time-off — holiday_type differentiates.','⚡ Leave balance = allocation − used. virtual_remaining_leaves includes pending requests.','⚡ Accrual plans define how leave accumulates over time (monthly, yearly).']},
+   fr:{name:'Congés',tn:'hr_holidays',desc:'Gestion des congés : types, allocations, demandes et approbations. S\'intègre avec la paie et les feuilles de temps.',
+    models:[
+     {name:'Demande de congé',tech:'hr.leave',desc:'Représente une demande de congé d\'un employé.',
+      fields:[{n:'holiday_status_id',t:'many2one',r:1,d:'Type de congé'},{n:'employee_id',t:'many2one',r:1,d:'Employé demandant le congé'},{n:'date_from',t:'date',r:1,d:'Date de début'},{n:'date_to',t:'date',r:1,d:'Date de fin'},{n:'number_of_days',t:'float',r:0,d:'Durée en jours (calculée)'},{n:'state',t:'select',r:1,d:'draft|confirm|validate1|validate|refuse'},{n:'holiday_type',t:'select',r:1,d:'employee|department|company|category'}]},
+     {name:'Type de congé',tech:'hr.leave.type',desc:'Configure un type de congé (Payé, Maladie, Sans solde…).',
+      fields:[{n:'name',t:'char',r:1,d:'Nom du type de congé'},{n:'allocation_type',t:'select',r:1,d:'fixed|accrual|no_limit'},{n:'leave_validation_type',t:'select',r:1,d:'no_validation|time_off|both'},{n:'virtual_remaining_leaves',t:'float',r:0,d:'Jours restants (calculé par employé)'},{n:'requires_allocation',t:'select',r:0,d:'yes|no'}]}
+    ],
+    wf:{title:'Approbation d\'une demande de congé',states:['Brouillon','→','Confirmée','→','Approbation (1er niv.)','→','Validée','/ Refusée'],st:['start','','','end','','cancel'],
+     steps:[{n:'01',t:'Soumettre la demande',d:'L\'employé soumet la demande. État = confirm.'},{n:'02',t:'Première approbation',d:'Si validation à 2 niveaux, le responsable approuve en premier.'},{n:'03',t:'Validation RH',d:'Le gestionnaire RH valide. État = validate. Solde déduit.'},{n:'04',t:'Refuser',d:'Le responsable refuse — état = refuse avec raison optionnelle.'}]},
+    tips:['⚡ hr.leave gère à la fois les allocations et les demandes de congés — holiday_type les distingue.','⚡ Solde = allocation − utilisé. virtual_remaining_leaves inclut les demandes en cours.','⚡ Les plans d\'acquisition définissent l\'accumulation des congés dans le temps.']}
+  },
+
+  {id:'website',icon:'🌐',cat:'website',
+   en:{name:'Website',tn:'website',desc:'eCommerce website builder with drag-and-drop pages, SEO tools, product catalog, shopping cart, and payment integration.',
+    models:[
+     {name:'Website',tech:'website',desc:'Represents an individual website instance (multi-website support).',
+      fields:[{n:'name',t:'char',r:1,d:'Website name'},{n:'domain',t:'char',r:0,d:'Domain (e.g. myshop.com)'},{n:'company_id',t:'many2one',r:1,d:'Related company'},{n:'default_lang_id',t:'many2one',r:1,d:'Default language'},{n:'theme_id',t:'many2one',r:0,d:'Active website theme'}]},
+     {name:'Website Page',tech:'website.page',desc:'Represents a published or draft page on the website.',
+      fields:[{n:'name',t:'char',r:1,d:'Page title'},{n:'url',t:'char',r:1,d:'URL path (e.g. /about)'},{n:'website_published',t:'bool',r:0,d:'Whether page is public'},{n:'website_id',t:'many2one',r:0,d:'Target website (multi-website)'},{n:'is_homepage',t:'bool',r:0,d:'Mark as homepage'}]}
+    ],
+    wf:{title:'eCommerce Order Flow',states:['Cart','→','Checkout','→','Payment','→','Sale Order','→','Delivered'],st:['start','','','','','end'],
+     steps:[{n:'01',t:'Add to Cart',d:'Customer adds products to cart — creates a draft sale.order.'},{n:'02',t:'Checkout',d:'Customer fills shipping info, applies coupon/pricelist.'},{n:'03',t:'Payment',d:'Payment provider processes payment and confirms the order.'},{n:'04',t:'Order Confirmed',d:'sale.order state → "sale". Delivery triggered automatically.'}]},
+    tips:['⚡ Website pages and views use ir.ui.view with the website key field.','⚡ QWeb templates power website rendering — understand t-if, t-foreach, t-call.','⚡ website_published=True makes content visible to unauthenticated users.']},
+   fr:{name:'Site Web',tn:'website',desc:'Constructeur de site eCommerce avec pages glisser-déposer, outils SEO, catalogue produits, panier et intégration paiements.',
+    models:[
+     {name:'Site Web',tech:'website',desc:'Représente une instance de site web (support multi-sites).',
+      fields:[{n:'name',t:'char',r:1,d:'Nom du site'},{n:'domain',t:'char',r:0,d:'Domaine (ex. monshop.fr)'},{n:'company_id',t:'many2one',r:1,d:'Société liée'},{n:'default_lang_id',t:'many2one',r:1,d:'Langue par défaut'},{n:'theme_id',t:'many2one',r:0,d:'Thème actif du site'}]},
+     {name:'Page Web',tech:'website.page',desc:'Représente une page publiée ou brouillon du site.',
+      fields:[{n:'name',t:'char',r:1,d:'Titre de la page'},{n:'url',t:'char',r:1,d:'Chemin URL (ex. /a-propos)'},{n:'website_published',t:'bool',r:0,d:'Page publique ou non'},{n:'website_id',t:'many2one',r:0,d:'Site cible (multi-sites)'},{n:'is_homepage',t:'bool',r:0,d:'Marquer comme page d\'accueil'}]}
+    ],
+    wf:{title:'Flux de commande eCommerce',states:['Panier','→','Validation','→','Paiement','→','Commande client','→','Livré'],st:['start','','','','','end'],
+     steps:[{n:'01',t:'Ajouter au panier',d:'Le client ajoute des produits — crée un sale.order brouillon.'},{n:'02',t:'Validation commande',d:'Le client renseigne les infos de livraison, applique un coupon.'},{n:'03',t:'Paiement',d:'Le prestataire traite la transaction et confirme la commande.'},{n:'04',t:'Commande confirmée',d:'État sale.order → "sale". Livraison déclenchée automatiquement.'}]},
+    tips:['⚡ Les pages et vues web utilisent ir.ui.view avec le champ website.','⚡ Les templates QWeb pilotent le rendu — maîtriser t-if, t-foreach, t-call.','⚡ website_published=True rend le contenu visible aux utilisateurs non connectés.']}
+  },
+];
+
+/* ─────────────────────────────────────────
+   QUIZ QUESTIONS (bilingual)
+───────────────────────────────────────── */
+const QS=[
+  {mod:'sale',
+   en:{cat:'Sales',q:'Which model stores a confirmed sales order in Odoo?',opts:['sale.quotation','sale.order','account.move','crm.lead'],a:1,expl:'<strong>sale.order</strong> is used for both quotations (state=draft) and confirmed orders (state=sale).'},
+   fr:{cat:'Ventes',q:'Quel modèle stocke une commande client confirmée dans Odoo ?',opts:['sale.quotation','sale.order','account.move','crm.lead'],a:1,expl:'<strong>sale.order</strong> est utilisé pour les devis (state=draft) et les commandes confirmées (state=sale).'}},
+  {mod:'sale',
+   en:{cat:'Sales',q:'What field on sale.order.line tracks the delivered quantity?',opts:['product_uom_qty','qty_invoiced','qty_delivered','qty_done'],a:2,expl:'<strong>qty_delivered</strong> is computed from stock moves or timesheets depending on the delivery method.'},
+   fr:{cat:'Ventes',q:'Quel champ de sale.order.line suit la quantité livrée ?',opts:['product_uom_qty','qty_invoiced','qty_delivered','qty_done'],a:2,expl:'<strong>qty_delivered</strong> est calculé à partir des mouvements de stock ou des feuilles de temps.'}},
+  {mod:'sale',
+   en:{cat:'Sales',q:'Invoicing policy "based on ordered quantities" means:',opts:['Invoice after delivery','Invoice on order confirmation','Invoice from timesheets','Invoice monthly'],a:1,expl:'The "ordered" policy allows invoicing immediately on order confirmation — before delivery.'},
+   fr:{cat:'Ventes',q:'La politique de facturation "quantités commandées" signifie :',opts:['Facturer après livraison','Facturer dès la confirmation','Facturer selon les feuilles de temps','Facturer mensuellement'],a:1,expl:'La politique "commandé" permet de facturer dès la confirmation de commande — avant la livraison.'}},
+  {mod:'crm',
+   en:{cat:'CRM',q:'In Odoo CRM, leads and opportunities are stored in which model?',opts:['crm.opportunity','crm.lead','sale.lead','crm.pipeline'],a:1,expl:'<strong>crm.lead</strong> stores both leads (type="lead") and opportunities (type="opportunity").'},
+   fr:{cat:'CRM',q:'Dans Odoo CRM, pistes et opportunités sont dans quel modèle ?',opts:['crm.opportunity','crm.lead','sale.lead','crm.pipeline'],a:1,expl:'<strong>crm.lead</strong> stocke les pistes (type="lead") et les opportunités (type="opportunity").'}},
+  {mod:'crm',
+   en:{cat:'CRM',q:'What field differentiates a lead from an opportunity in crm.lead?',opts:['stage_id','is_lead','type','priority'],a:2,expl:'The <strong>type</strong> field contains either "lead" or "opportunity".'},
+   fr:{cat:'CRM',q:'Quel champ distingue une piste d\'une opportunité dans crm.lead ?',opts:['stage_id','is_lead','type','priority'],a:2,expl:'Le champ <strong>type</strong> contient soit "lead" soit "opportunity".'}},
+  {mod:'crm',
+   en:{cat:'CRM',q:'Which field on crm.stage marks it as a winning stage?',opts:['is_closed','is_won','won_stage','closed'],a:1,expl:'<strong>is_won = True</strong> on a crm.stage means any opportunity in that stage is considered won.'},
+   fr:{cat:'CRM',q:'Quel champ de crm.stage marque une étape comme "gagnante" ?',opts:['is_closed','is_won','won_stage','closed'],a:1,expl:'<strong>is_won = True</strong> sur crm.stage signifie que toute opportunité dans cette étape est considérée gagnée.'}},
+  {mod:'account',
+   en:{cat:'Accounting',q:'Customer invoices and vendor bills both use which model?',opts:['account.invoice','account.entry','account.move','account.bill'],a:2,expl:'<strong>account.move</strong> is the unified model. move_type distinguishes out_invoice, in_invoice, etc.'},
+   fr:{cat:'Comptabilité',q:'Factures clients et fournisseurs utilisent quel modèle ?',opts:['account.invoice','account.entry','account.move','account.bill'],a:2,expl:'<strong>account.move</strong> est le modèle unifié. move_type distingue out_invoice, in_invoice, etc.'}},
+  {mod:'account',
+   en:{cat:'Accounting',q:'What move_type value represents a customer credit note?',opts:['out_refund','in_refund','credit_note','out_credit'],a:0,expl:'<strong>out_refund</strong> is a credit note issued to a customer. in_refund is a vendor credit note.'},
+   fr:{cat:'Comptabilité',q:'Quelle valeur de move_type représente un avoir client ?',opts:['out_refund','in_refund','credit_note','out_credit'],a:0,expl:'<strong>out_refund</strong> est un avoir émis au client. in_refund est un avoir fournisseur.'}},
+  {mod:'account',
+   en:{cat:'Accounting',q:'Which field shows the outstanding (unpaid) balance on an invoice?',opts:['amount_total','amount_due','amount_residual','balance'],a:2,expl:'<strong>amount_residual</strong> decreases as payments are reconciled and reaches 0 when fully paid.'},
+   fr:{cat:'Comptabilité',q:'Quel champ montre le solde impayé d\'une facture ?',opts:['amount_total','amount_due','amount_residual','balance'],a:2,expl:'<strong>amount_residual</strong> diminue au fur et à mesure des lettrages et atteint 0 quand entièrement payée.'}},
+  {mod:'account',
+   en:{cat:'Accounting',q:'What does action_post() do on an account.move?',opts:['Sends invoice by email','Creates journal entries and assigns a sequence','Registers a payment','Archives the record'],a:1,expl:'<strong>action_post()</strong> confirms the invoice, assigns the sequence number, and creates double-entry journal items.'},
+   fr:{cat:'Comptabilité',q:'Que fait action_post() sur un account.move ?',opts:['Envoie la facture par email','Crée les écritures et attribue un numéro de séquence','Enregistre un paiement','Archive l\'enregistrement'],a:1,expl:'<strong>action_post()</strong> confirme la facture, attribue le numéro de séquence et crée les écritures en partie double.'}},
+  {mod:'stock',
+   en:{cat:'Inventory',q:'Which model represents the ACTUAL physical quantity at a location?',opts:['stock.move','stock.picking','stock.quant','stock.location'],a:2,expl:'<strong>stock.quant</strong> holds the real on-hand quantity. stock.move records the intended movement.'},
+   fr:{cat:'Inventaire',q:'Quel modèle représente la quantité physique RÉELLE à un emplacement ?',opts:['stock.move','stock.picking','stock.quant','stock.location'],a:2,expl:'<strong>stock.quant</strong> détient la quantité réelle en stock. stock.move enregistre le mouvement prévu.'}},
+  {mod:'stock',
+   en:{cat:'Inventory',q:'What state is a stock.picking in when stock is reserved but not validated?',opts:['confirmed','assigned','ready','waiting'],a:1,expl:'State <strong>assigned</strong> means stock is reserved. "confirmed" means not yet reserved.'},
+   fr:{cat:'Inventaire',q:'Quel état a un stock.picking lorsque le stock est réservé mais pas encore validé ?',opts:['confirmed','assigned','ready','waiting'],a:1,expl:'L\'état <strong>assigned</strong> signifie que le stock est réservé. "confirmed" = non encore réservé.'}},
+  {mod:'stock',
+   en:{cat:'Inventory',q:'In a 3-step delivery, what is the correct order?',opts:['Pack → Pick → Ship','Pick → Pack → Ship','Ship → Pack → Pick','Pick → Ship → Pack'],a:1,expl:'3-step delivery: <strong>Pick → Pack → Ship</strong>: pick from shelf, pack at station, then ship to customer.'},
+   fr:{cat:'Inventaire',q:'Dans une livraison en 3 étapes, quel est l\'ordre correct ?',opts:['Emballer → Prélever → Expédier','Prélever → Emballer → Expédier','Expédier → Emballer → Prélever','Prélever → Expédier → Emballer'],a:1,expl:'La livraison en 3 étapes : <strong>Prélever → Emballer → Expédier</strong>.'}},
+  {mod:'base',
+   en:{cat:'Base',q:'Which model is the foundation for customers, vendors, and contacts?',opts:['res.contact','res.users','res.partner','base.contact'],a:2,expl:'<strong>res.partner</strong> is the universal contact model. customer_rank > 0 = customer, supplier_rank > 0 = vendor.'},
+   fr:{cat:'Base',q:'Quel modèle est la base des clients, fournisseurs et contacts dans Odoo ?',opts:['res.contact','res.users','res.partner','base.contact'],a:2,expl:'<strong>res.partner</strong> est le modèle de contact universel. customer_rank > 0 = client, supplier_rank > 0 = fournisseur.'}},
+  {mod:'base',
+   en:{cat:'Base',q:'How does res.users relate to res.partner in Odoo?',opts:['_inherit (extension)','_inherits (delegation)','one2many relation','Separate unrelated model'],a:1,expl:'res.users uses <strong>_inherits</strong> (delegation inheritance) — each user has a linked partner record.'},
+   fr:{cat:'Base',q:'Comment res.users est-il lié à res.partner dans Odoo ?',opts:['_inherit (extension)','_inherits (délégation)','Relation one2many','Modèle séparé sans lien'],a:1,expl:'res.users utilise <strong>_inherits</strong> (héritage par délégation) — chaque utilisateur a un enregistrement partenaire lié.'}},
+  {mod:'base',
+   en:{cat:'Base',q:'What is the purpose of ir.rule in Odoo?',opts:['Define field widgets','Row-level record access control','Create menu items','Schedule cron jobs'],a:1,expl:'<strong>ir.rule</strong> defines domain-based record rules — which records a user/group can read, write, create, or delete.'},
+   fr:{cat:'Base',q:'Quel est le rôle de ir.rule dans Odoo ?',opts:['Définir les widgets de champs','Contrôle d\'accès au niveau des enregistrements','Créer des éléments de menu','Planifier des tâches cron'],a:1,expl:'<strong>ir.rule</strong> définit des règles d\'enregistrement basées sur des domaines — sécurité au niveau des lignes.'}},
+  {mod:'project',
+   en:{cat:'Project',q:'Where are timesheets stored in Odoo?',opts:['project.timesheet','hr.timesheet','account.analytic.line','project.task.timesheet'],a:2,expl:'Timesheets are stored in <strong>account.analytic.line</strong> with unit_amount = hours, linked via task_id.'},
+   fr:{cat:'Projet',q:'Où sont stockées les feuilles de temps dans Odoo ?',opts:['project.timesheet','hr.timesheet','account.analytic.line','project.task.timesheet'],a:2,expl:'Les feuilles de temps sont dans <strong>account.analytic.line</strong> avec unit_amount = heures, liées via task_id.'}},
+  {mod:'project',
+   en:{cat:'Project',q:'What model defines the Kanban stages in the Project module?',opts:['project.stage','project.column','project.task.type','project.state'],a:2,expl:'<strong>project.task.type</strong> defines the stages. They can be shared or project-specific.'},
+   fr:{cat:'Projet',q:'Quel modèle définit les étapes Kanban dans le module Projet ?',opts:['project.stage','project.column','project.task.type','project.state'],a:2,expl:'<strong>project.task.type</strong> définit les étapes. Elles peuvent être partagées ou spécifiques à un projet.'}},
+  {mod:'mail',
+   en:{cat:'Mail / Discuss',q:'Which mixin should you inherit to add chatter to a custom model?',opts:['mail.chatter','mail.thread','mail.message','discuss.channel'],a:1,expl:'Inherit <strong>mail.thread</strong> (and optionally mail.activity.mixin) to add the chatter panel.'},
+   fr:{cat:'Discussion / Mail',q:'Quel mixin hériter pour ajouter un chatter à un modèle custom ?',opts:['mail.chatter','mail.thread','mail.message','discuss.channel'],a:1,expl:'Hériter de <strong>mail.thread</strong> (et optionnellement mail.activity.mixin) pour ajouter le chatter.'}},
+  {mod:'mail',
+   en:{cat:'Mail / Discuss',q:'What method programmatically posts a message to a record\'s chatter?',opts:['post_message()','send_message()','message_post()','create_message()'],a:2,expl:'<strong>message_post()</strong> is the standard ORM method to post messages, notifications, or emails.'},
+   fr:{cat:'Discussion / Mail',q:'Quelle méthode poste un message dans le chatter par code ?',opts:['post_message()','send_message()','message_post()','create_message()'],a:2,expl:'<strong>message_post()</strong> est la méthode ORM standard pour poster des messages ou notifications.'}},
+  {mod:'mrp',
+   en:{cat:'Manufacturing',q:'What does a BoM type of "phantom" mean in Odoo?',opts:['Product is virtual','It is a kit — no MO created, components move directly','Product is subcontracted','Triggers a maintenance request'],a:1,expl:'BoM type <strong>phantom</strong> = Kit. Components are consumed directly — no manufacturing order is created.'},
+   fr:{cat:'Fabrication',q:'Que signifie le type de nomenclature "phantom" dans Odoo ?',opts:['Le produit est virtuel','C\'est un kit — pas d\'OF, les composants bougent directement','Le produit est sous-traité','Cela déclenche une demande de maintenance'],a:1,expl:'Type <strong>phantom</strong> = Kit. Les composants sont consommés directement — aucun ordre de fabrication n\'est créé.'}},
+  {mod:'mrp',
+   en:{cat:'Manufacturing',q:'Which fields hold component moves and finished goods on mrp.production?',opts:['components_ids / finished_ids','move_raw_ids / move_finished_ids','input_ids / output_ids','bom_line_ids / product_ids'],a:1,expl:'<strong>move_raw_ids</strong> = component stock moves; <strong>move_finished_ids</strong> = finished product moves.'},
+   fr:{cat:'Fabrication',q:'Quels champs de mrp.production contiennent les composants et produits finis ?',opts:['components_ids / finished_ids','move_raw_ids / move_finished_ids','input_ids / output_ids','bom_line_ids / product_ids'],a:1,expl:'<strong>move_raw_ids</strong> = mouvements composants ; <strong>move_finished_ids</strong> = mouvements produits finis.'}},
+  {mod:'hr',
+   en:{cat:'HR',q:'An employee\'s private home address in Odoo is stored as:',opts:['A field directly on hr.employee','A res.partner linked via address_home_id','A separate hr.address model','Encrypted text on the employee record'],a:1,expl:'<strong>address_home_id</strong> on hr.employee links to a res.partner record for the private address.'},
+   fr:{cat:'RH',q:'L\'adresse privée d\'un employé dans Odoo est stockée en tant que :',opts:['Champ direct sur hr.employee','Un res.partner lié via address_home_id','Un modèle hr.address séparé','Texte chiffré dans la fiche employé'],a:1,expl:'<strong>address_home_id</strong> sur hr.employee lie vers un enregistrement res.partner pour l\'adresse privée.'}},
+  {mod:'hr_payroll',
+   en:{cat:'Payroll',q:'In a salary rule, what Python variable holds the employee\'s basic contract wage?',opts:['employee.wage','contract.wage','payslip.basic_wage','BASIC'],a:1,expl:'Inside a salary rule formula, <strong>contract.wage</strong> gives the gross wage from the hr.contract record.'},
+   fr:{cat:'Paie',q:'Dans une règle salariale, quelle variable Python contient le salaire de base du contrat ?',opts:['employee.wage','contract.wage','payslip.basic_wage','BASIC'],a:1,expl:'Dans une formule de règle salariale, <strong>contract.wage</strong> donne le salaire brut du contrat hr.contract.'}},
+  {mod:'hr_leave',
+   en:{cat:'Time Off',q:'What state does a leave request have after the employee submits it?',opts:['draft','validate','confirm','waiting'],a:2,expl:'After submission, the leave request state becomes <strong>confirm</strong>. The manager then validates it.'},
+   fr:{cat:'Congés',q:'Quel état a une demande de congé après soumission par l\'employé ?',opts:['draft','validate','confirm','waiting'],a:2,expl:'Après soumission, l\'état de la demande de congé devient <strong>confirm</strong>. Le responsable la valide ensuite.'}},
+  {mod:'website',
+   en:{cat:'Website',q:'What template language does Odoo use for website pages?',opts:['Jinja2','QWeb','Twig','Handlebars'],a:1,expl:'Odoo uses <strong>QWeb</strong>, its XML-based template language, with directives like t-if, t-foreach, and t-call.'},
+   fr:{cat:'Site Web',q:'Quel langage de template Odoo utilise-t-il pour les pages web ?',opts:['Jinja2','QWeb','Twig','Handlebars'],a:1,expl:'Odoo utilise <strong>QWeb</strong>, son propre langage de template XML, avec des directives comme t-if, t-foreach et t-call.'}},
+];
+
+/* ─────────────────────────────────────────
+   STATE
+───────────────────────────────────────── */
+let lang='en', curMod=null, activeCat='all', qList=[], qIdx=0, qScore=0, qTotal=10, answered=false, selCnt=10;
+
+/* ─────────────────────────────────────────
+   LANG SWITCH
+───────────────────────────────────────── */
+function setLang(l){
+  lang=l;
+  document.getElementById('lb-en').classList.toggle('active',l==='en');
+  document.getElementById('lb-fr').classList.toggle('active',l==='fr');
+  document.documentElement.lang=l;
+  applyUI();
+  renderGrid(filtered());
+  if(curMod) openMod(curMod.id);
+}
+
+function tx(k){return T[lang][k]||T.en[k];}
+
+function applyUI(){
+  const L=T[lang];
+  document.getElementById('nav-explorer-lbl').textContent=L.explorer;
+  document.getElementById('nl-txt').textContent=L.navLearn;
+  document.getElementById('nq-txt').textContent=L.navQuiz;
+  document.getElementById('h-eyebrow').textContent=L.eyebrow;
+  const h1=document.getElementById('h-h1');
+  h1.childNodes[0].textContent=L.h1pre;
+  document.getElementById('h-em').textContent=L.h1em;
+  document.getElementById('h-sub').textContent=L.sub;
+  document.getElementById('st-mod').textContent=L.stMod;
+  document.getElementById('st-mdl').textContent=L.stMdl;
+  document.getElementById('st-fld').textContent=L.stFld;
+  document.getElementById('st-q').textContent=L.stQ;
+  document.getElementById('srch').placeholder=L.searchPh;
+  // cat buttons
+  const cats=document.querySelectorAll('.cat-btn');
+  const catKeys=['catAll','sales','finance','inventory','hr','project','website','manufacture','technical'];
+  L.cats.forEach((c,i)=>{if(cats[i])cats[i].textContent=c;});
+  document.getElementById('back-lbl').textContent=L.backLbl;
+  document.getElementById('tab-m-txt').textContent=L.tabM;
+  document.getElementById('tab-w-txt').textContent=L.tabW;
+  document.getElementById('tab-t-txt').textContent=L.tabT;
+  document.getElementById('qz-title').textContent='🧠 '+L.qzTitle;
+  document.getElementById('qz-sub').textContent=L.qzSub;
+  document.getElementById('qz-lbl-mod').textContent=L.qzLblMod;
+  document.getElementById('qz-lbl-cnt').textContent=L.qzLblCnt;
+  document.getElementById('cnt-all-btn').textContent=L.cntAll;
+  document.getElementById('btn-start').textContent=L.btnStart;
+  document.getElementById('btn-skip').textContent=L.btnSkip;
+  document.getElementById('btn-next').textContent=L.btnNext;
+  document.getElementById('btn-retry').textContent=L.btnRetry;
+  document.getElementById('btn-bklearn').textContent=L.btnBack;
+  buildQuizSelect();
+}
+
+/* ─────────────────────────────────────────
+   NAV
+───────────────────────────────────────── */
+function showView(v){
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(e=>e.classList.remove('active'));
+  if(v==='learn'){
+    document.getElementById('learn-view').classList.add('active');
+    document.getElementById('ntab-learn').classList.add('active');
+  } else {
+    document.getElementById('quiz-view-wrap').classList.add('active');
+    document.getElementById('ntab-quiz').classList.add('active');
+    buildQuizSelect();
+  }
+}
+
+/* ─────────────────────────────────────────
+   MODULE GRID
+───────────────────────────────────────── */
+function md(m){return m[lang]||m.en;}
+function filtered(){
+  const q=(document.getElementById('srch')||{value:''}).value.toLowerCase();
+  return MODS.filter(m=>{
+    const d=md(m);
+    return (activeCat==='all'||m.cat===activeCat)&&(!q||d.name.toLowerCase().includes(q)||d.tn.toLowerCase().includes(q)||d.desc.toLowerCase().includes(q));
+  });
+}
+function filterMods(){renderGrid(filtered());}
+function filterCat(cat,btn){
+  activeCat=cat;
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid(filtered());
+}
+
+const catColors={sales:'#00d4ff',finance:'#22c55e',inventory:'#ff6b35',hr:'#f5c842',project:'#7c5cfc',website:'#ec4899',manufacture:'#14b8a6',technical:'#8b5cf6'};
+
+function renderGrid(mods){
+  const g=document.getElementById('mod-grid');
+  g.innerHTML='';
+  if(!mods.length){g.innerHTML='<div style="padding:40px;color:var(--muted);grid-column:1/-1;text-align:center;font-size:.82rem;">No modules found.</div>';return;}
+  mods.forEach(m=>{
+    const d=md(m), cc=catColors[m.cat]||'#7c5cfc';
+    const card=document.createElement('div');
+    card.className=`module-card cat-${m.cat}`;
+    card.style.setProperty('--cc',cc);
+    card.onclick=()=>openMod(m.id);
+    card.innerHTML=`<div class="mod-icon">${m.icon}</div><div class="mod-name">${d.name}</div><div class="mod-tech">${d.tn}</div><div class="mod-desc">${d.desc}</div><span class="mod-badge">${m.cat}</span>`;
+    g.appendChild(card);
+  });
+}
+
+/* ─────────────────────────────────────────
+   DETAIL
+───────────────────────────────────────── */
+function openMod(id){
+  curMod=MODS.find(m=>m.id===id);if(!curMod)return;
+  const d=md(curMod), cc=catColors[curMod.cat]||'#7c5cfc';
+  document.getElementById('list-screen').classList.add('hidden');
+  document.getElementById('detail-screen').classList.remove('hidden');
+  window.scrollTo(0,0);
+  const dv=document.getElementById('detail-view');
+  dv.style.setProperty('--cc',cc);
+  document.getElementById('d-icon').textContent=curMod.icon;
+  document.getElementById('d-icon').style.cssText=`background:${cc}22;border:1px solid ${cc}44`;
+  document.getElementById('d-title').textContent=d.name;
+  document.getElementById('d-tech').textContent='// '+d.tn;
+  document.getElementById('d-desc').textContent=d.desc;
+  const meta=document.getElementById('d-meta');
+  meta.innerHTML='';
+  (curMod.en.models||[]).forEach(m=>{const c=document.createElement('span');c.className='meta-chip';c.textContent=m.tech;meta.appendChild(c);});
+  document.querySelectorAll('.sec-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('stab-models').classList.add('active');
+  showSec('models',null);
+}
+
+function backToList(){
+  document.getElementById('list-screen').classList.remove('hidden');
+  document.getElementById('detail-screen').classList.add('hidden');
+}
+
+function showSec(sec, btn){
+  if(btn){document.querySelectorAll('.sec-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');}
+  document.getElementById('sec-models').className='models-list hidden';
+  document.getElementById('sec-workflow').className='hidden wf-wrap';
+  document.getElementById('sec-tips').className='hidden';
+  const d=md(curMod);
+  if(sec==='models'){
+    const el=document.getElementById('sec-models');
+    el.classList.remove('hidden');
+    renderModels(el,d.models);
+  } else if(sec==='workflow'){
+    const el=document.getElementById('sec-workflow');
+    el.classList.remove('hidden');
+    renderWF(el,d.wf);
+  } else {
+    const el=document.getElementById('sec-tips');
+    el.classList.remove('hidden');
+    renderTips(el,d.tips,d.name);
+  }
+}
+
+function renderModels(el,models){
+  el.innerHTML='';
+  models.forEach(m=>{
+    const row=document.createElement('div');
+    row.className='model-row';
+    row.innerHTML=`<div class="model-row-hd" onclick="toggleRow(this.parentElement)">
+      <div><div class="model-lbl">${m.name}</div><div class="model-tech">${m.tech}</div><div class="model-sdesc">${m.desc}</div></div>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="fields-panel">
+      <table class="ftable">
+        <thead><tr><th>${tx('fName')}</th><th>${tx('fType')}</th><th>${tx('fReq')}</th><th>${tx('fDesc')}</th></tr></thead>
+        <tbody>${m.fields.map(f=>`<tr>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:.73rem;color:var(--accent2)">${f.n}</td>
+          <td><span class="ftype ${f.t}">${f.t}</span></td>
+          <td><span class="freq ${f.r?'req':''}">${f.r?tx('req'):tx('opt')}</span></td>
+          <td style="color:var(--muted2)">${f.d}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+    el.appendChild(row);
+  });
+}
+
+function toggleRow(row){row.classList.toggle('open');}
+
+function renderWF(el,wf){
+  const st=wf.st||[];
+  el.innerHTML=`<div class="wf-title">🔄 ${wf.title}</div>
+    <div class="wf-states">${wf.states.map((s,i)=>s==='→'||s==='/'?`<div class="wf-arrow">${s}</div>`:`<div class="wf-state ${st[i]||''}">${s}</div>`).join('')}</div>
+    <div class="wf-steps">${wf.steps.map(s=>`<div class="wf-step"><div class="wf-step-n">${tx('step')} ${s.n}</div><div class="wf-step-t">${s.t}</div><div class="wf-step-d">${s.d}</div></div>`).join('')}</div>`;
+}
+
+function renderTips(el,tips,name){
+  if(!tips||!tips.length){el.innerHTML='<div style="color:var(--muted);font-size:.8rem;">—</div>';return;}
+  el.innerHTML=`<div class="tip-box"><strong style="display:block;margin-bottom:12px;font-family:'Syne',sans-serif;font-size:.88rem;">💡 ${tx('tipsFor')} ${name}</strong>${tips.map(t=>`<div style="margin-bottom:10px;padding-left:8px;border-left:2px solid var(--accent)">${t}</div>`).join('')}</div>`;
+}
+
+/* ─────────────────────────────────────────
+   QUIZ
+───────────────────────────────────────── */
+function buildQuizSelect(){
+  const sel=document.getElementById('qz-mod-sel');
+  sel.innerHTML=`<option value="all">${tx('qzAll')}</option>`;
+  [...new Set(QS.map(q=>q.mod))].forEach(mid=>{
+    const m=MODS.find(x=>x.id===mid);
+    if(m){const o=document.createElement('option');o.value=mid;o.textContent=md(m).name;sel.appendChild(o);}
+  });
+}
+
+function setCnt(n,btn){
+  selCnt=n;
+  document.querySelectorAll('.cnt-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function startQuiz(){
+  const mod=document.getElementById('qz-mod-sel').value;
+  let pool=mod==='all'?[...QS]:QS.filter(q=>q.mod===mod);
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+  qList=pool.slice(0,Math.min(selCnt===999?9999:selCnt,pool.length));
+  qIdx=0;qScore=0;answered=false;
+  document.getElementById('quiz-setup').classList.add('hidden');
+  document.getElementById('quiz-results').classList.add('hidden');
+  document.getElementById('quiz-active').classList.remove('hidden');
+  renderQ();
+}
+
+function renderQ(){
+  if(qIdx>=qList.length){showResults();return;}
+  const q=qList[qIdx], qd=q[lang]||q.en;
+  answered=false;
+  document.getElementById('q-cat').textContent=qd.cat;
+  document.getElementById('q-text').textContent=qd.q;
+  document.getElementById('q-expl').innerHTML=qd.expl;
+  document.getElementById('q-expl').classList.remove('show');
+  document.getElementById('btn-next').classList.add('hidden');
+  document.getElementById('btn-next').textContent=tx('btnNext');
+  document.getElementById('btn-skip').textContent=tx('btnSkip');
+  document.getElementById('qz-ctr').textContent=`${qIdx+1} / ${qList.length}`;
+  document.getElementById('qz-score').textContent=`⭐ ${qScore}`;
+  document.getElementById('qz-prog').style.width=(qIdx/qList.length*100)+'%';
+  const opts=document.getElementById('q-opts');
+  opts.innerHTML='';
+  const ltrs=['A','B','C','D'];
+  qd.opts.forEach((o,i)=>{
+    const el=document.createElement('div');
+    el.className='q-opt';
+    el.innerHTML=`<span class="opt-ltr">${ltrs[i]}</span><span>${o}</span>`;
+    el.onclick=()=>pick(i,qd.a);
+    opts.appendChild(el);
+  });
+  const card=document.getElementById('qz-card');
+  card.style.animation='none';
+  requestAnimationFrame(()=>{card.style.animation='slideIn .3s ease';});
+}
+
+function pick(chosen,correct){
+  if(answered)return;answered=true;
+  const opts=document.querySelectorAll('.q-opt');
+  opts.forEach(o=>o.classList.add('disabled'));
+  if(chosen===correct){opts[chosen].classList.add('correct');qScore++;}
+  else{opts[chosen].classList.add('wrong');opts[correct].classList.add('correct');}
+  document.getElementById('q-expl').classList.add('show');
+  document.getElementById('btn-next').classList.remove('hidden');
+}
+
+function nextQ(){qIdx++;renderQ();}
+function skipQ(){if(!answered){qIdx++;renderQ();}}
+
+function showResults(){
+  document.getElementById('quiz-active').classList.add('hidden');
+  document.getElementById('quiz-results').classList.remove('hidden');
+  const pct=Math.round(qScore/qList.length*100);
+  const rl=T[lang].res;
+  let emoji='😟',label=rl[0];
+  if(pct>=90){emoji='🏆';label=rl[90];}
+  else if(pct>=75){emoji='🎉';label=rl[75];}
+  else if(pct>=60){emoji='💪';label=rl[60];}
+  document.getElementById('r-emoji').textContent=emoji;
+  document.getElementById('r-score').textContent=`${qScore} / ${qList.length}`;
+  document.getElementById('r-label').textContent=label+` (${pct}%)`;
+  document.getElementById('btn-retry').textContent=tx('btnRetry');
+  document.getElementById('btn-bklearn').textContent=tx('btnBack');
+  setTimeout(()=>{document.getElementById('r-bar').style.width=pct+'%';},200);
+}
+
+function resetQuiz(){
+  document.getElementById('quiz-results').classList.add('hidden');
+  document.getElementById('quiz-active').classList.add('hidden');
+  document.getElementById('quiz-setup').classList.remove('hidden');
+}
+
+/* ─────────────────────────────────────────
+   BUILD CATEGORY BUTTONS
+───────────────────────────────────────── */
+(function buildCats(){
+  const cf=document.getElementById('cat-filters');
+  cf.innerHTML='';
+  const cats=[['all',null],['sales','sales'],['finance','finance'],['inventory','inventory'],['hr','hr'],['project','project'],['website','website'],['manufacture','manufacture'],['technical','technical']];
+  cats.forEach(([key,cat])=>{
+    const btn=document.createElement('button');
+    btn.className='cat-btn'+(key==='all'?' active':'');
+    btn.setAttribute('data-cat',key);
+    btn.onclick=()=>filterCat(cat||'all',btn);
+    cf.appendChild(btn);
+  });
+})();
+
+/* BUILD h1 structure */
+(function buildH1(){
+  const h1=document.getElementById('h-h1');
+  h1.innerHTML='';
+  const txt=document.createTextNode('');
+  h1.appendChild(txt);
+  const em=document.createElement('em');
+  em.id='h-em';
+  h1.appendChild(em);
+})();
+
+/* ─────────────────────────────────────────
+   INIT
+───────────────────────────────────────── */
+applyUI();
+renderGrid(MODS);
+</script>
+</body>
+</html>
