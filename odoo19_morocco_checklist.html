@@ -731,8 +731,8 @@ function generatePDF() {
     doc.setTextColor(150, 150, 150);
     doc.text('Odoo 19 — Discovery Checklist Maroc', margin, 8);
     doc.text(`${client} — ${date}`, W - margin, 8, { align: 'right' });
-    if (companyLogoData) { try { doc.addImage(companyLogoData, 'PNG', W/2 - 10, 1.5, 10, 8, undefined, 'FAST'); } catch(e){} }
-    if (clientLogoData)  { try { doc.addImage(clientLogoData,  'PNG', W/2 + 2,  1.5, 10, 8, undefined, 'FAST'); } catch(e){} }
+    if (companyLogoData) { try { doc.addImage(companyLogoData, 'PNG', W/2 - 18, 2, 14, 8, undefined, 'FAST'); } catch(e){} }
+    if (clientLogoData)  { try { doc.addImage(clientLogoData,  'PNG', W/2 + 4,  2, 14, 8, undefined, 'FAST'); } catch(e){} }
   }
 
   function checkY(needed) {
@@ -747,42 +747,40 @@ function generatePDF() {
   doc.setFillColor(200, 75, 47);
   doc.rect(0, 0, 4, 110, 'F');
 
-  // ── Row 1: Logos (own row at top) ──
-  const logoW = 55, logoH = 22, logoY = 8, logoPad = 12;
+  // ── Row 1: Logos — no white box, directly on dark background ──
+  const logoH = 24, logoY = 9, logoPad = 20;
+
+  // Helper: compute rendered width from natural aspect ratio
+  function getLogoRenderW(imgEl, maxW) {
+    if (!imgEl || !imgEl.naturalWidth) return maxW;
+    const ratio = imgEl.naturalWidth / imgEl.naturalHeight;
+    return Math.min(maxW, Math.round(logoH * ratio));
+  }
+
+  const companyImgEl = document.getElementById('companyLogoImg');
+  const clientImgEl  = document.getElementById('clientLogoImg');
+  const companyRW = companyLogoData ? getLogoRenderW(companyImgEl, 70) : 0;
+  const clientRW  = clientLogoData  ? getLogoRenderW(clientImgEl,  70) : 0;
+
+  // Société logo — left aligned
   const logo1X = margin + 4;
-  const logo2X = logo1X + logoW + logoPad;
-
-  // société box
-  doc.setFillColor(255, 255, 255);
-  doc.roundedRect(logo1X, logoY, logoW, logoH, 2, 2, 'F');
   if (companyLogoData) {
-    try { doc.addImage(companyLogoData, 'PNG', logo1X + 2, logoY + 1, logoW - 4, logoH - 2, undefined, 'FAST'); } catch(e) {}
-  } else {
-    doc.setTextColor(160, 160, 170); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
-    doc.text('Logo société', logo1X + logoW / 2, logoY + logoH / 2 + 2, { align: 'center' });
+    try { doc.addImage(companyLogoData, 'PNG', logo1X, logoY, companyRW, logoH, undefined, 'FAST'); } catch(e) {}
   }
-  doc.setTextColor(120, 120, 135); doc.setFontSize(7); doc.setFont('helvetica', 'normal');
-  doc.text('SOCIÉTÉ', logo1X + logoW / 2, logoY + logoH + 4.5, { align: 'center' });
 
-  // client box
-  doc.setFillColor(255, 255, 255);
-  doc.roundedRect(logo2X, logoY, logoW, logoH, 2, 2, 'F');
+  // Client logo — right aligned
+  const logo2X = W - margin - 4 - clientRW;
   if (clientLogoData) {
-    try { doc.addImage(clientLogoData, 'PNG', logo2X + 2, logoY + 1, logoW - 4, logoH - 2, undefined, 'FAST'); } catch(e) {}
-  } else {
-    doc.setTextColor(160, 160, 170); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
-    doc.text('Logo client', logo2X + logoW / 2, logoY + logoH / 2 + 2, { align: 'center' });
+    try { doc.addImage(clientLogoData, 'PNG', logo2X, logoY, clientRW, logoH, undefined, 'FAST'); } catch(e) {}
   }
-  doc.setTextColor(120, 120, 135); doc.setFontSize(7); doc.setFont('helvetica', 'normal');
-  doc.text('CLIENT', logo2X + logoW / 2, logoY + logoH + 4.5, { align: 'center' });
 
   // ── Divider after logo row ──
   doc.setDrawColor(40, 42, 55);
   doc.setLineWidth(0.4);
-  doc.line(margin + 4, logoY + logoH + 9, W - margin, logoY + logoH + 9);
+  doc.line(margin + 4, logoY + logoH + 6, W - margin, logoY + logoH + 6);
 
   // ── Row 2: Title ──
-  const titleY = logoY + logoH + 18;
+  const titleY = logoY + logoH + 14;
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(22);
