@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Odoo 19 — Discovery Checklist Maroc</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0f1117;
+    --ink2: #3a3d4a;
+    --ink3: #7a7f91;
+    --paper: #faf9f6;
+    --surface: #ffffff;
+    --border: #e4e2db;
+    --accent: #c84b2f;
+    --accent2: #1a5c8a;
+    --accent3: #2a7a4f;
+    --accent-pale: #f7ece8;
+    --radius: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+  }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--ink);
+    color: white;
+    padding: 2rem 3rem 1.8rem;
+    position: relative;
+  }
+  .header-logo-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 1.2rem;
+    margin-bottom: 1.2rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .logo-pair {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+  }
+  .logo-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+  .logo-upload-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.38);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .logo-box {
+    width: auto;
+    min-width: 80px;
+    max-width: 220px;
+    height: 56px;
+    border: 1.5px dashed rgba(255,255,255,0.18);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, background 0.2s;
+    background: rgba(255,255,255,0.03);
+  }
+  .logo-box:hover { border-color: rgba(232,115,90,0.55); background: rgba(255,255,255,0.06); }
+  .logo-box img {
+    width: auto;
+    height: 100%;
+    max-height: 56px;
+    object-fit: contain;
+    padding: 6px;
+    display: none;
+  }
+  .logo-box img.visible { display: block; }
+  .logo-box input[type=file] {
+    position: absolute; inset: 0;
+    opacity: 0; cursor: pointer;
+    width: 100%; height: 100%;
+  }
+  .logo-placeholder {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    pointer-events: none;
+  }
+  .logo-placeholder svg { opacity: 0.25; }
+  .logo-placeholder span { font-size: 10px; color: rgba(255,255,255,0.28); font-family: 'DM Mono', monospace; }
+  .logo-vs {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.2);
+    padding: 0 4px;
+  }
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.2rem;
+    font-weight: 400;
+    line-height: 1.2;
+    position: relative;
+    z-index: 1;
+  }
+  .header h1 span { color: #e8735a; }
+  .header-meta {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .header-meta input {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px;
+    color: white;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    padding: 6px 12px;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .header-meta input::placeholder { color: rgba(255,255,255,0.35); }
+  .header-meta input:focus { border-color: rgba(232,115,90,0.6); }
+
+  /* ── Progress bar ── */
+  .progress-strip {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 3rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .progress-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--ink3);
+    white-space: nowrap;
+  }
+  .progress-track {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #e8735a);
+    border-radius: 2px;
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+  .progress-pct {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    min-width: 40px;
+    text-align: right;
+  }
+
+  /* ── Generate PDF button ── */
+  .generate-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Sora', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 7px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    transition: background 0.18s, transform 0.1s;
+  }
+  .generate-btn:hover { background: #b03f25; }
+  .generate-btn:active { transform: scale(0.97); }
+
+  /* ── Main layout ── */
+  .main { padding: 2rem 3rem 4rem; max-width: 900px; margin: 0 auto; }
+
+  /* ── Module section ── */
+  .module {
+    margin-bottom: 2.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .module-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 1.1rem 1.5rem;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .module-header:hover { background: #fafaf8; }
+  .module-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+  .module-name {
+    flex: 1;
+    font-weight: 500;
+    font-size: 15px;
+  }
+  .module-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--ink3);
+  }
+  .module-chevron {
+    font-size: 13px;
+    color: var(--ink3);
+    transition: transform 0.25s;
+  }
+  .module.collapsed .module-chevron { transform: rotate(-90deg); }
+  .module.collapsed .module-body { display: none; }
+
+  .module-body { padding: 0.5rem 0; }
+
+  /* ── Group ── */
+  .group-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    padding: 0.9rem 1.5rem 0.4rem;
+  }
+
+  /* ── Question row ── */
+  .q-row {
+    padding: 0.8rem 1.5rem;
+    border-bottom: 1px solid #f2f0eb;
+    transition: background 0.12s;
+  }
+  .q-row:last-child { border-bottom: none; }
+  .q-row:hover { background: #fdfcfa; }
+  .q-row.answered { background: #f8fdf9; }
+
+  .q-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .q-checkbox {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.18s, background 0.18s;
+    font-size: 11px;
+  }
+  .q-row.answered .q-checkbox {
+    border-color: #2a7a4f;
+    background: #2a7a4f;
+    color: white;
+  }
+  .q-text {
+    flex: 1;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--ink2);
+  }
+  .q-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .q-answer-wrap {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .q-answer-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink3);
+    padding-top: 7px;
+    flex-shrink: 0;
+    min-width: 60px;
+  }
+  .q-answer {
+    flex: 1;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    resize: vertical;
+    min-height: 38px;
+    max-height: 160px;
+    outline: none;
+    transition: border-color 0.18s, min-height 0.2s;
+    line-height: 1.6;
+    width: 100%;
+  }
+  .q-answer:focus { border-color: var(--accent2); }
+  .q-answer.has-content { background: white; border-color: #b8d8c0; }
+
+  /* ── Tag colors ── */
+  .tag-légal    { background: #fff0ec; color: #a33018; }
+  .tag-config   { background: #ecf4fb; color: #1a4f7a; }
+  .tag-custom   { background: #1a1a2e; color: #e8a87c; font-weight: 600; letter-spacing: 0.03em; }
+  .tag-processus { background: #f0f9f3; color: #1f6b3e; }
+  .tag-fonctionnel { background: #fdf5e8; color: #7a4d10; }
+  .tag-volume   { background: #f5f5f5; color: #555; }
+  .tag-reporting { background: #f0f5fd; color: #234080; }
+  .tag-sécurité  { background: #fef0f0; color: #8a2020; }
+  .tag-règle    { background: #fef8e8; color: #7a5a10; }
+  .tag-périmètre { background: #eef8f5; color: #1a5a48; }
+
+  /* ── Module accent colors ── */
+  .mod-compta .module-icon { background: #edf4fb; color: #185FA5; }
+  .mod-compta .module-header { border-left: 3px solid #185FA5; }
+  .mod-analytique .module-icon { background: #f0f9ec; color: #3B6D11; }
+  .mod-analytique .module-header { border-left: 3px solid #3B6D11; }
+  .mod-achat .module-icon { background: #fef3e7; color: #854F0B; }
+  .mod-achat .module-header { border-left: 3px solid #854F0B; }
+  .mod-infra .module-icon { background: #f3f0fb; color: #5a35c0; }
+  .mod-infra .module-header { border-left: 3px solid #5a35c0; }
+
+  /* ── Footer note ── */
+  .footer-note {
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink3);
+    margin-top: 2rem;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── Print toast ── */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--ink);
+    color: white;
+    font-size: 13px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+    z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="header">
+
+  <!-- Row 1: logos only -->
+  <div class="header-logo-row">
+    <div class="logo-upload">
+      <span class="logo-upload-label">Logo société</span>
+      <div class="logo-box" id="companyLogoBox">
+        <div class="logo-placeholder">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Importer</span>
+        </div>
+        <img id="companyLogoImg" alt="Logo société">
+        <input type="file" accept="image/*" onchange="loadLogo('companyLogoImg','companyLogoBox',this)">
+      </div>
+    </div>
+    <div class="logo-vs">×</div>
+    <div class="logo-upload">
+      <span class="logo-upload-label">Logo client</span>
+      <div class="logo-box" id="clientLogoBox">
+        <div class="logo-placeholder">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Importer</span>
+        </div>
+        <img id="clientLogoImg" alt="Logo client">
+        <input type="file" accept="image/*" onchange="loadLogo('clientLogoImg','clientLogoBox',this)">
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: title + eyebrow -->
+  <div class="header-eyebrow">Odoo 19 · odoo.sh · Maroc — Sprint 1 : Configuration & Custom Dev</div>
+  <h1>Discovery <span>Checklist</span></h1>
+
+  <!-- Row 3: meta fields -->
+  <div class="header-meta">
+    <input type="text" id="clientName" placeholder="Nom du client" style="width:200px">
+    <input type="text" id="projectName" placeholder="Nom du projet" style="width:200px">
+    <input type="date" id="meetingDate">
+    <input type="text" id="consultant" placeholder="Consultant" style="width:160px">
+  </div>
+
+</div>
+
+<div class="progress-strip">
+  <span class="progress-label">Progression</span>
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <span class="progress-pct" id="progressPct">0%</span>
+  <button class="generate-btn" onclick="generatePDF()">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+    Générer PDF
+  </button>
+</div>
+
+<div class="main" id="main"></div>
+<div class="footer-note">Odoo 19 · odoo.sh · Conformité Maroc — Généré par Claude</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const MODULES = [
+  {
+    id: "compta",
+    cls: "mod-compta",
+    icon: "💰",
+    label: "Comptabilité",
+    groups: [
+      { label: "Configuration — Conformité Maroc", questions: [
+        { text: "Faut-il activer la localisation Maroc (CGNC) dans Odoo ou utiliser un plan comptable personnalisé ?", tag: "config" },
+        { text: "Quelles taxes TVA configurer (taux 20%, 14%, 7%, 0%, exonéré) ? Y a-t-il des cas particuliers ?", tag: "légal" },
+        { text: "Faut-il activer la retenue à la source (RAS) sur certains fournisseurs ?", tag: "légal" },
+        { text: "Avez-vous besoin des déclarations DGI pré-remplies directement depuis Odoo ?", tag: "légal" },
+      ]},
+      { label: "Configuration — Saisie & Rapprochement", questions: [
+        { text: "Combien de journaux comptables à créer (banques, caisses, ventes, achats, OD) ?", tag: "config" },
+        { text: "Le rapprochement bancaire sera-t-il manuel ou semi-automatique (import de relevé) ?", tag: "config" },
+        { text: "Y a-t-il des devises étrangères à activer (USD, EUR) avec réévaluation automatique ?", tag: "config" },
+      ]},
+      { label: "Configuration — Trésorerie & Prévision", questions: [
+        { text: "Combien de comptes bancaires / caisses à configurer dans Odoo ?", tag: "config" },
+        { text: "Souhaitez-vous activer le module de prévision de trésorerie natif d'Odoo ?", tag: "config" },
+        { text: "Quels horizons de prévision souhaitez-vous afficher (30, 60, 90 jours) ?", tag: "fonctionnel" },
+      ]},
+      { label: "Configuration — Clôtures & Workflow", questions: [
+        { text: "Quelle est la date de clôture de l'exercice fiscal à configurer ?", tag: "légal" },
+        { text: "Faut-il activer le verrouillage automatique des périodes après clôture mensuelle ?", tag: "config" },
+        { text: "Quel workflow d'approbation des écritures comptables souhaitez-vous (qui valide) ?", tag: "processus" },
+      ]},
+      { label: "Détection Custom Dev", questions: [
+        { text: "Les formats de déclaration DGI disponibles dans Odoo couvrent-ils vos obligations légales ou faut-il un module spécifique Maroc ?", tag: "custom" },
+        { text: "Avez-vous des règles de calcul de TVA ou RAS qui ne correspondent pas au comportement standard d'Odoo ?", tag: "custom" },
+        { text: "Y a-t-il des rapports comptables spécifiques (format DGI, CBI, etc.) non couverts par Odoo standard ?", tag: "custom" },
+      ]},
+    ]
+  },
+  {
+    id: "analytique",
+    cls: "mod-analytique",
+    icon: "📊",
+    label: "Compta Analytique & Budgétaire",
+    groups: [
+      { label: "Configuration — Plans analytiques", questions: [
+        { text: "Combien de plans analytiques à créer ? Quelle hiérarchie (1 niveau, 2 niveaux) ?", tag: "config" },
+        { text: "Quels axes analytiques configurer (centres de coût, projets, départements, régions) ?", tag: "config" },
+        { text: "Les axes analytiques sont-ils obligatoires sur toutes les pièces ou seulement certaines ?", tag: "règle" },
+        { text: "Y a-t-il des règles de répartition automatique des charges à paramétrer ?", tag: "config" },
+      ]},
+      { label: "Configuration — Budget", questions: [
+        { text: "Faut-il activer le module Budget natif d'Odoo 19 ?", tag: "config" },
+        { text: "Le budget est-il annuel uniquement ou faut-il gérer des budgets par trimestre / mois ?", tag: "config" },
+        { text: "Quel comportement en cas de dépassement : alerte uniquement ou blocage de la validation ?", tag: "règle" },
+        { text: "Qui saisit les budgets initiaux et qui autorise les révisions en cours d'année ?", tag: "processus" },
+      ]},
+      { label: "Configuration — Reporting", questions: [
+        { text: "Les rapports natifs d'Odoo (budget vs réel par axe) sont-ils suffisants ou faut-il des vues personnalisées ?", tag: "config" },
+        { text: "Faut-il configurer un export automatique vers Excel ou un outil BI (PowerBI, etc.) ?", tag: "config" },
+        { text: "Quels profils d'accès aux données analytiques (lecture seule, saisie, validation) ?", tag: "sécurité" },
+      ]},
+      { label: "Détection Custom Dev", questions: [
+        { text: "Le moteur de répartition analytique natif couvre-t-il vos règles métier ou faut-il un développement spécifique ?", tag: "custom" },
+        { text: "Avez-vous besoin d'un tableau de bord analytique personnalisé (format, KPIs) non disponible en standard ?", tag: "custom" },
+        { text: "Y a-t-il une intégration avec un outil de consolidation groupe nécessitant un connecteur custom ?", tag: "custom" },
+      ]},
+    ]
+  },
+  {
+    id: "achat",
+    cls: "mod-achat",
+    icon: "🛒",
+    label: "Achat (Purchase)",
+    groups: [
+      { label: "Configuration — Fournisseurs & Paramétrage", questions: [
+        { text: "Combien de fournisseurs à créer manuellement pour démarrer (saisie directe dans Odoo) ?", tag: "config" },
+        { text: "Y a-t-il un processus de qualification fournisseur à modéliser dans Odoo (statuts, documents requis) ?", tag: "config" },
+        { text: "Faut-il gérer les fournisseurs étrangers avec des devises et conditions Incoterms ?", tag: "config" },
+      ]},
+      { label: "Configuration — Workflow Demandes & Commandes", questions: [
+        { text: "Qui peut créer une demande d'achat ? Quels niveaux de validation hiérarchique configurer ?", tag: "processus" },
+        { text: "Quels seuils de montant déclenchent un niveau de validation supplémentaire ?", tag: "règle" },
+        { text: "Faut-il activer le module Appels d'offres (RFQ multi-fournisseurs) et la comparaison de devis ?", tag: "config" },
+        { text: "Y a-t-il des délais de livraison ou des conditions de paiement standards à préconfigurer ?", tag: "config" },
+      ]},
+      { label: "Configuration — Réception & Facturation", questions: [
+        { text: "La politique de facturation achat sera-t-elle sur la commande ou sur la réception (3-way matching) ?", tag: "config" },
+        { text: "La réception est-elle réalisée par le même service que les achats ou faut-il séparer les accès ?", tag: "sécurité" },
+        { text: "Comment configurer le traitement des avoirs fournisseurs (retour, avoir direct) ?", tag: "config" },
+      ]},
+      { label: "Configuration — Intégration comptable", questions: [
+        { text: "Quels comptes comptables associer aux catégories de produits achetés (charges par nature) ?", tag: "config" },
+        { text: "Faut-il activer l'imputation analytique automatique sur les lignes de commande d'achat ?", tag: "config" },
+        { text: "Quelles taxes achat configurer (TVA déductible, droits de douane, taxes spécifiques Maroc) ?", tag: "légal" },
+      ]},
+      { label: "Détection Custom Dev", questions: [
+        { text: "Le workflow d'approbation natif d'Odoo couvre-t-il vos règles de validation ou faut-il une logique métier supplémentaire ?", tag: "custom" },
+        { text: "Avez-vous besoin d'un bon de commande avec un format PDF spécifique (logo, mentions légales Maroc, langue arabe) ?", tag: "custom" },
+        { text: "Y a-t-il des interfaces avec un portail fournisseurs ou un système EDI externe à développer ?", tag: "custom" },
+      ]},
+    ]
+  },
+  {
+    id: "infra",
+    cls: "mod-infra",
+    icon: "☁️",
+    label: "Infrastructure odoo.sh",
+    groups: [
+      { label: "Configuration plateforme", questions: [
+        { text: "Quelle région odoo.sh choisir (EU recommandé pour conformité RGPD) ?", tag: "config" },
+        { text: "Combien de branches à configurer : dev / staging / production ?", tag: "config" },
+        { text: "Avez-vous un repo GitHub à connecter, ou faut-il en créer un nouveau ?", tag: "config" },
+        { text: "Quels modules de la communauté OCA ou partenaires faut-il installer dès le départ ?", tag: "config" },
+      ]},
+      { label: "Configuration — Utilisateurs & Droits", questions: [
+        { text: "Combien d'utilisateurs par module ? Quels groupes de droits Odoo (utilisateur, responsable, administrateur) ?", tag: "config" },
+        { text: "Faut-il configurer des règles d'accès par société, par magasin ou par entité analytique ?", tag: "sécurité" },
+        { text: "Y a-t-il une authentification SSO / Active Directory / Google Workspace à connecter ?", tag: "config" },
+      ]},
+      { label: "Configuration — Société & Paramètres généraux", questions: [
+        { text: "Combien de sociétés à créer dans Odoo (mono-société ou multi-société) ?", tag: "config" },
+        { text: "Quels paramètres généraux configurer : langue (FR/AR), devise (MAD), fuseau horaire ?", tag: "config" },
+        { text: "Faut-il configurer les modèles d'e-mail, les entêtes de documents (logo, adresse, IF, RC, CNSS) ?", tag: "config" },
+      ]},
+      { label: "Détection Custom Dev", questions: [
+        { text: "Y a-t-il des systèmes tiers à connecter via API (banque, DGI, paie, logistique) nécessitant un développement ?", tag: "custom" },
+        { text: "Avez-vous besoin de documents légaux en arabe (factures, BC) — localisation linguistique custom ?", tag: "custom" },
+        { text: "Y a-t-il des automatisations ou des alertes métier non couvertes par les actions automatiques natives d'Odoo ?", tag: "custom" },
+      ]},
+    ]
+  }
+];
+
+let answers = {};
+let checked = {};
+
+function getKey(modId, gi, qi) { return `${modId}_${gi}_${qi}`; }
+
+function updateProgress() {
+  let total = 0, done = 0;
+  MODULES.forEach(m => m.groups.forEach(g => g.questions.forEach((q, qi) => {
+    total++;
+    const key = getKey(m.id, m.groups.indexOf(g), qi);
+    if (checked[key]) done++;
+  })));
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+  MODULES.forEach(m => {
+    let mt = 0, md = 0;
+    m.groups.forEach((g, gi) => g.questions.forEach((q, qi) => {
+      mt++;
+      if (checked[getKey(m.id, gi, qi)]) md++;
+    }));
+    const cnt = document.getElementById('cnt-' + m.id);
+    if (cnt) cnt.textContent = md + ' / ' + mt;
+  });
+}
+
+function buildUI() {
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+  MODULES.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'module ' + m.cls;
+    div.id = 'mod-' + m.id;
+
+    let total = m.groups.reduce((s, g) => s + g.questions.length, 0);
+    div.innerHTML = `
+      <div class="module-header" onclick="toggleModule('${m.id}')">
+        <div class="module-icon">${m.icon}</div>
+        <div class="module-name">${m.label}</div>
+        <span class="module-count" id="cnt-${m.id}">0 / ${total}</span>
+        <span class="module-chevron">▼</span>
+      </div>
+      <div class="module-body" id="body-${m.id}"></div>
+    `;
+
+    const body = div.querySelector('.module-body');
+    m.groups.forEach((g, gi) => {
+      const glbl = document.createElement('div');
+      glbl.className = 'group-label';
+      glbl.textContent = g.label;
+      body.appendChild(glbl);
+
+      g.questions.forEach((q, qi) => {
+        const key = getKey(m.id, gi, qi);
+        const row = document.createElement('div');
+        row.className = 'q-row';
+        row.id = 'row-' + key;
+        row.innerHTML = `
+          <div class="q-top">
+            <div class="q-checkbox" id="cb-${key}" onclick="toggleCheck('${key}')"></div>
+            <div class="q-text">${q.text}</div>
+            <span class="q-tag tag-${q.tag}">${q.tag}</span>
+          </div>
+          <div class="q-answer-wrap">
+            <span class="q-answer-label">Réponse :</span>
+            <textarea class="q-answer" id="ans-${key}" placeholder="Saisir la réponse du client…" rows="1"
+              oninput="saveAnswer('${key}', this)"
+              onfocus="this.style.minHeight='60px'"
+              onblur="if(!this.value)this.style.minHeight='38px'"
+            ></textarea>
+          </div>
+        `;
+        body.appendChild(row);
+      });
+    });
+
+    main.appendChild(div);
+  });
+  updateProgress();
+}
+
+function toggleModule(id) {
+  document.getElementById('mod-' + id).classList.toggle('collapsed');
+}
+
+function toggleCheck(key) {
+  checked[key] = !checked[key];
+  const cb = document.getElementById('cb-' + key);
+  const row = document.getElementById('row-' + key);
+  if (checked[key]) {
+    cb.textContent = '✓';
+    row.classList.add('answered');
+  } else {
+    cb.textContent = '';
+    row.classList.remove('answered');
+  }
+  updateProgress();
+}
+
+function saveAnswer(key, el) {
+  answers[key] = el.value;
+  el.classList.toggle('has-content', !!el.value.trim());
+  if (el.value.trim() && !checked[key]) {
+    checked[key] = true;
+    const cb = document.getElementById('cb-' + key);
+    const row = document.getElementById('row-' + key);
+    cb.textContent = '✓';
+    row.classList.add('answered');
+    updateProgress();
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+  const client = document.getElementById('clientName').value || 'Client';
+  const project = document.getElementById('projectName').value || 'Projet';
+  const date = document.getElementById('meetingDate').value || new Date().toLocaleDateString('fr-FR');
+  const consultant = document.getElementById('consultant').value || '';
+
+  const companyLogoImg = document.getElementById('companyLogoImg');
+  const clientLogoImg = document.getElementById('clientLogoImg');
+  const companyLogoData = companyLogoImg.classList.contains('visible') ? companyLogoImg.src : null;
+  const clientLogoData = clientLogoImg.classList.contains('visible') ? clientLogoImg.src : null;
+
+  const W = 210, margin = 18, contentW = W - margin * 2;
+  let y = 0;
+
+  function newPage() {
+    doc.addPage();
+    y = 18;
+    doc.setFillColor(15, 17, 23);
+    doc.rect(0, 0, W, 12, 'F');
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(150, 150, 150);
+    doc.text('Odoo 19 — Discovery Checklist Maroc', margin, 8);
+    doc.text(`${client} — ${date}`, W - margin, 8, { align: 'right' });
+    if (companyLogoData) { try { doc.addImage(companyLogoData, 'PNG', W/2 - 10, 1.5, 10, 8, undefined, 'FAST'); } catch(e){} }
+    if (clientLogoData)  { try { doc.addImage(clientLogoData,  'PNG', W/2 + 2,  1.5, 10, 8, undefined, 'FAST'); } catch(e){} }
+  }
+
+  function checkY(needed) {
+    if (y + needed > 272) newPage();
+  }
+
+  // ── Cover ──
+  // Full dark band
+  doc.setFillColor(15, 17, 23);
+  doc.rect(0, 0, W, 110, 'F');
+  // Red left accent bar
+  doc.setFillColor(200, 75, 47);
+  doc.rect(0, 0, 4, 110, 'F');
+
+  // ── Row 1: Logos (own row at top) ──
+  const logoW = 55, logoH = 22, logoY = 8, logoPad = 12;
+  const logo1X = margin + 4;
+  const logo2X = logo1X + logoW + logoPad;
+
+  // société box
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(logo1X, logoY, logoW, logoH, 2, 2, 'F');
+  if (companyLogoData) {
+    try { doc.addImage(companyLogoData, 'PNG', logo1X + 2, logoY + 1, logoW - 4, logoH - 2, undefined, 'FAST'); } catch(e) {}
+  } else {
+    doc.setTextColor(160, 160, 170); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+    doc.text('Logo société', logo1X + logoW / 2, logoY + logoH / 2 + 2, { align: 'center' });
+  }
+  doc.setTextColor(120, 120, 135); doc.setFontSize(7); doc.setFont('helvetica', 'normal');
+  doc.text('SOCIÉTÉ', logo1X + logoW / 2, logoY + logoH + 4.5, { align: 'center' });
+
+  // client box
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(logo2X, logoY, logoW, logoH, 2, 2, 'F');
+  if (clientLogoData) {
+    try { doc.addImage(clientLogoData, 'PNG', logo2X + 2, logoY + 1, logoW - 4, logoH - 2, undefined, 'FAST'); } catch(e) {}
+  } else {
+    doc.setTextColor(160, 160, 170); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+    doc.text('Logo client', logo2X + logoW / 2, logoY + logoH / 2 + 2, { align: 'center' });
+  }
+  doc.setTextColor(120, 120, 135); doc.setFontSize(7); doc.setFont('helvetica', 'normal');
+  doc.text('CLIENT', logo2X + logoW / 2, logoY + logoH + 4.5, { align: 'center' });
+
+  // ── Divider after logo row ──
+  doc.setDrawColor(40, 42, 55);
+  doc.setLineWidth(0.4);
+  doc.line(margin + 4, logoY + logoH + 9, W - margin, logoY + logoH + 9);
+
+  // ── Row 2: Title ──
+  const titleY = logoY + logoH + 18;
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(22);
+  doc.text('DISCOVERY CHECKLIST', margin + 4, titleY);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(200, 150, 135);
+  doc.text('Odoo 19  ·  odoo.sh  ·  Sprint 1 — Configuration & Custom Dev', margin + 4, titleY + 7);
+
+  // ── Row 3: Meta fields ──
+  doc.setDrawColor(55, 57, 68);
+  doc.setLineWidth(0.3);
+  doc.line(margin + 4, titleY + 12, W - margin, titleY + 12);
+
+  const col2 = W / 2 + 4;
+  const metaY = titleY + 19;
+  doc.setTextColor(140, 140, 155); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+  doc.text('Client', margin + 4, metaY);
+  doc.text('Projet', col2, metaY);
+  doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+  doc.text(client, margin + 4, metaY + 5.5);
+  doc.text(project, col2, metaY + 5.5);
+  doc.setTextColor(140, 140, 155); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+  doc.text('Consultant', margin + 4, metaY + 12);
+  doc.text('Date', col2, metaY + 12);
+  doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+  doc.text(consultant || '—', margin + 4, metaY + 17.5);
+  doc.text(date, col2, metaY + 17.5);
+
+  y = 125;
+
+  // ── Modules ──
+  MODULES.forEach(m => {
+    checkY(20);
+
+    // Module header bar
+    const colors = {
+      compta: [24, 95, 165],
+      analytique: [59, 109, 17],
+      achat: [133, 79, 11],
+      infra: [90, 53, 192]
+    };
+    const [r, g2, b] = colors[m.id] || [80, 80, 80];
+    doc.setFillColor(r, g2, b);
+    doc.rect(margin, y, contentW, 9, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.text(m.label.toUpperCase(), margin + 4, y + 6.2);
+    y += 13;
+
+    m.groups.forEach((grp, gi) => {
+      checkY(10);
+
+      // Group label
+      doc.setFillColor(245, 244, 240);
+      doc.rect(margin, y, contentW, 6, 'F');
+      doc.setTextColor(100, 100, 100);
+      doc.setFont('helvetica', 'bolditalic');
+      doc.setFontSize(8);
+      doc.text(grp.label, margin + 3, y + 4.2);
+      y += 9;
+
+      grp.questions.forEach((q, qi) => {
+        const key = getKey(m.id, gi, qi);
+        const ansVal = (document.getElementById('ans-' + key) || {}).value || answers[key] || '';
+        const isChecked = !!checked[key];
+
+        const qLines = doc.splitTextToSize(q.text, contentW - 14);
+        const aLines = ansVal ? doc.splitTextToSize(ansVal, contentW - 20) : [];
+        const rowH = 7 + qLines.length * 5 + (aLines.length ? 4 + aLines.length * 4.5 : 0) + 4;
+
+        checkY(rowH);
+
+        // Row background
+        doc.setFillColor(isChecked ? 248 : 255, isChecked ? 253 : 255, isChecked ? 249 : 255);
+        doc.rect(margin, y, contentW, rowH - 2, 'F');
+        doc.setDrawColor(225, 222, 215);
+        doc.setLineWidth(0.3);
+        doc.rect(margin, y, contentW, rowH - 2, 'S');
+
+        // Checkbox
+        const cbX = margin + 4, cbY = y + 4;
+        doc.setDrawColor(isChecked ? 42 : 180, isChecked ? 122 : 180, isChecked ? 79 : 180);
+        doc.setLineWidth(0.8);
+        doc.rect(cbX, cbY, 4, 4, 'S');
+        if (isChecked) {
+          doc.setTextColor(42, 122, 79);
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(7);
+          doc.text('✓', cbX + 0.5, cbY + 3.2);
+        }
+
+        // Tag
+        const tagColors = {
+          légal: [200, 75, 47], config: [26, 92, 138], custom: [30, 20, 60],
+          processus: [42, 122, 79], fonctionnel: [122, 77, 16], volume: [100,100,100],
+          reporting: [35, 64, 128], sécurité: [138, 32, 32], règle: [122, 90, 16],
+          périmètre: [26, 90, 72]
+        };
+        const [tr, tg, tb] = tagColors[q.tag] || [100, 100, 100];
+        doc.setFillColor(tr + 220 > 255 ? 255 : tr + 220, tg + 200 > 255 ? 255 : tg + 200, tb + 200 > 255 ? 255 : tb + 200);
+        const tagW = doc.getTextWidth(q.tag) * 0.8 + 6;
+        doc.roundedRect(margin + contentW - tagW - 2, y + 3, tagW, 5, 1, 1, 'F');
+        doc.setTextColor(tr, tg, tb);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7);
+        doc.text(q.tag, margin + contentW - tagW / 2 - 2, y + 6.8, { align: 'center' });
+
+        // Question text
+        doc.setTextColor(30, 30, 50);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        let qy = y + 7;
+        qLines.forEach(line => {
+          doc.text(line, margin + 12, qy);
+          qy += 5;
+        });
+
+        // Answer
+        if (aLines.length) {
+          doc.setTextColor(100, 100, 100);
+          doc.setFont('helvetica', 'italic');
+          doc.setFontSize(7.5);
+          doc.text('Réponse :', margin + 12, qy + 1);
+          doc.setTextColor(30, 80, 50);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(8.5);
+          qy += 5;
+          aLines.forEach(line => {
+            doc.text(line, margin + 22, qy);
+            qy += 4.5;
+          });
+        }
+
+        y += rowH;
+      });
+      y += 3;
+    });
+    y += 6;
+  });
+
+  // ── Summary page ──
+  newPage();
+  doc.setFillColor(15, 17, 23);
+  doc.rect(margin, y, contentW, 10, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text('RÉCAPITULATIF', margin + 4, y + 7);
+  y += 15;
+
+  let total = 0, done = 0;
+  MODULES.forEach(m => {
+    let mt = 0, md = 0;
+    m.groups.forEach((g, gi) => g.questions.forEach((q, qi) => {
+      mt++; total++;
+      if (checked[getKey(m.id, gi, qi)]) { md++; done++; }
+    }));
+    const pct = mt ? Math.round(md / mt * 100) : 0;
+    const [r, g2, b] = { compta: [24, 95, 165], analytique: [59, 109, 17], achat: [133, 79, 11], infra: [90, 53, 192] }[m.id] || [80,80,80];
+
+    checkY(12);
+    doc.setTextColor(30, 30, 50);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(m.label, margin, y + 4);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(r, g2, b);
+    doc.text(`${md} / ${mt} (${pct}%)`, W - margin, y + 4, { align: 'right' });
+
+    doc.setFillColor(230, 230, 230);
+    doc.rect(margin, y + 6, contentW, 3, 'F');
+    doc.setFillColor(r, g2, b);
+    doc.rect(margin, y + 6, contentW * pct / 100, 3, 'F');
+    y += 13;
+  });
+
+  y += 6;
+  const globalPct = total ? Math.round(done / total * 100) : 0;
+  doc.setFillColor(200, 75, 47);
+  doc.rect(margin, y, contentW, 10, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text(`TOTAL : ${done} / ${total} questions — ${globalPct}%`, margin + 4, y + 7);
+
+  // Unanswered section
+  y += 18;
+  const unanswered = [];
+  MODULES.forEach(m => m.groups.forEach((g, gi) => g.questions.forEach((q, qi) => {
+    if (!checked[getKey(m.id, gi, qi)]) unanswered.push({ mod: m.label, q: q.text });
+  })));
+
+  if (unanswered.length) {
+    checkY(14);
+    doc.setFillColor(250, 240, 235);
+    doc.rect(margin, y, contentW, 8, 'F');
+    doc.setTextColor(160, 60, 30);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text(`⚠  Questions en attente (${unanswered.length})`, margin + 4, y + 5.5);
+    y += 12;
+
+    unanswered.forEach(item => {
+      checkY(10);
+      const lines = doc.splitTextToSize(`${item.mod} — ${item.q}`, contentW - 8);
+      doc.setTextColor(100, 50, 30);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      lines.forEach(line => {
+        doc.text('• ' + line, margin + 2, y);
+        y += 5;
+      });
+    });
+  }
+
+  // Footer on all pages
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFillColor(230, 228, 222);
+    doc.rect(0, 287, W, 10, 'F');
+    doc.setTextColor(120, 120, 110);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.text(`Odoo 19 · odoo.sh — ${client} — ${date}`, margin, 293);
+    doc.text(`Page ${i} / ${pageCount}`, W - margin, 293, { align: 'right' });
+  }
+
+  const fname = `checklist_${client.replace(/\s+/g, '_') || 'client'}_${date.replace(/\//g, '-')}.pdf`;
+  doc.save(fname);
+  showToast('✓ PDF généré : ' + fname);
+}
+
+function loadLogo(imgId, boxId, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById(imgId);
+    const box = document.getElementById(boxId);
+    img.src = e.target.result;
+    img.onload = () => {
+      const ratio = img.naturalWidth / img.naturalHeight;
+      const newW = Math.min(220, Math.max(80, Math.round(56 * ratio)));
+      box.style.width = newW + 'px';
+    };
+    img.classList.add('visible');
+    box.querySelector('.logo-placeholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+buildUI();
+</script>
+</body>
+</html>
